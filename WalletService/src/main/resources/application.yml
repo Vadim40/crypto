@@ -1,0 +1,17 @@
+server:
+  port: 8080
+spring:
+  name: WalletService
+  data:
+    mongodb:
+      authentication-database: admin
+      username: user
+      password: pass
+      database: wallet
+      port: 27017
+      host: localhost
+      auto-index-creation: true
+
+jwt:
+  secret: 2$2a$12$uHQpJLE9OUEEqeKQg48CYOLC
+  lifetime: 30m
