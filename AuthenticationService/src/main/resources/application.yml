@@ -1,16 +1,16 @@
 server:
   port: 8080
 spring:
-  name: WalletService
-  data:
-    mongodb:
-      authentication-database: admin
-      username: user
-      password: pass
-      database: wallet
-      port: 27017
-      host: localhost
-      auto-index-creation: true
+  datasource:
+    url: jdbc:postgresql://localhost:5433/authentication_service
+    username: user
+    password: pass
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 
 jwt:
   secret: 2$2a$12$uHQpJLE9OUEEqeKQg48CYOLC
