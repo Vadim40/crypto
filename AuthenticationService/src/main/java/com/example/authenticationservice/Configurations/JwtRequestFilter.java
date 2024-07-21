@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,23 +26,26 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     private final JwtTokenUtils jwtTokenUtils;
 
     @Override
-    protected void doFilterInternal(@NonNull HttpServletRequest request,
-                                    @NonNull HttpServletResponse response,
-                                    @NonNull FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
         String username = null;
         String jwt = null;
+        boolean isOtpToken = false;
+
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             jwt = authHeader.substring(7);
             try {
                 username = jwtTokenUtils.getUsername(jwt);
+                isOtpToken = jwtTokenUtils.isOtpToken(jwt);
             } catch (ExpiredJwtException e) {
-                log.error("token lifetime has expired");
-            } catch (SignatureException e) {
-                log.error("the token signature is incorrect");
-            }
 
+                log.error("Token lifetime has expired");
+            } catch (SignatureException e) {
+                log.error("The token signature is incorrect");
+            }
         }
+
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
                     username,
@@ -50,22 +54,15 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             );
             SecurityContextHolder.getContext().setAuthentication(token);
         }
-//        if (request.getRequestURI().equals("/api/verify-otp")) {
-//            String otpClaim = jwtTokenUtils.extractClaimFromJwt(jwt, "otp");
-//            if (otpClaim == null) {
-//                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-//                response.getWriter().write("Missing OTP claim");
-//                return;
-//            }
-//        } else {
-//            String otpClaim = jwtTokenUtils.extractClaimFromJwt(jwt, "otp");
-//            if (otpClaim != null) {
-//                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-//                response.getWriter().write("Access denied");
-//                return;
-//            }
-//        }
 
-        filterChain.doFilter(request, response);
+        if (isOtpToken) {
+            if (request.getRequestURI().equals("/api/verify-otp")) {
+                filterChain.doFilter(request, response);
+            } else {
+                response.setStatus(HttpStatus.FORBIDDEN.value());
+            }
+        } else {
+            filterChain.doFilter(request, response);
+        }
     }
 }

@@ -3,6 +3,8 @@ package com.example.authenticationservice.Models;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 @Entity
 @Table
@@ -17,5 +19,6 @@ public class Otp {
     @Column
     private String otp;
 
-
+    @Column
+    private LocalDateTime expiryTime;
 }

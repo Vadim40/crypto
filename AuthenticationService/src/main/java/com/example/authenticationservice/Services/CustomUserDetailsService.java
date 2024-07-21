@@ -33,7 +33,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .map(role -> new SimpleGrantedAuthority(role.name()))
                 .collect(Collectors.toSet());
 
-        return new CustomUserDetails(account.getEmail(), account.getPassword(), authorities, account.isOTPEnabled());
+        return new CustomUserDetails(account.getEmail(), account.getPassword(), authorities, account.isOtpEnabled());
     }
 
     public boolean isUserAuthenticated() {

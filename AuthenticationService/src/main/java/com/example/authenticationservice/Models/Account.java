@@ -32,8 +32,8 @@ public class Account {
     @Column(name = "role")
     private List<Role> roles = new ArrayList<>();
     @OneToOne(mappedBy = "account")
-    private Otp otp =new Otp();
+    private Otp otp ;
 
     @Column
-    private boolean isOTPEnabled ;
+    private boolean otpEnabled;
 }

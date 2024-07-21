@@ -65,10 +65,11 @@ public class JwtTokenUtils {
     public List<String> getRoles(String token) {
         return getAllClaimsFromToken(token).get("roles", List.class);
     }
-    public String extractClaimFromJwt(String token, String claimKey) {
+    public boolean isOtpToken(String token) {
         Claims claims = getAllClaimsFromToken(token);
-        return claims.get(claimKey, String.class);
+        return claims.get("otp", Boolean.class) != null && claims.get("otp", Boolean.class);
     }
+
 
 
     private Claims getAllClaimsFromToken(String token) {

@@ -62,10 +62,16 @@ public class AccountController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PutMapping("/enable-tfa")
+    @PutMapping("/enable-2fa")
     public ResponseEntity<Object> enableTfa(){
        Account account =userDetailsService.getAuthenticatedUser();
-       accountService.enableTfa(account.getEmail());
+       accountService.enable2fa(account.getEmail());
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+    @PutMapping("/disable-2fa")
+    public ResponseEntity<Object> disableTfa(){
+        Account account =userDetailsService.getAuthenticatedUser();
+        accountService.disable2fa(account.getEmail());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

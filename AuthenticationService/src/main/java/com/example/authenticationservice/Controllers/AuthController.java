@@ -1,10 +1,11 @@
 package com.example.authenticationservice.Controllers;
 
-import com.example.authenticationservice.Models.Account;
+import com.example.authenticationservice.Exceptions.OtpExpiredException;
+import com.example.authenticationservice.Exceptions.OtpNotEnabledException;
+import com.example.authenticationservice.Exceptions.OtpNotFoundException;
 import com.example.authenticationservice.Models.CustomUserDetails;
 import com.example.authenticationservice.Models.DTOs.JwtRequest;
 import com.example.authenticationservice.Models.DTOs.JwtResponse;
-import com.example.authenticationservice.Services.AccountServiceImpl;
 import com.example.authenticationservice.Services.CustomUserDetailsService;
 import com.example.authenticationservice.Services.OtpService;
 import com.example.authenticationservice.Utils.JwtTokenUtils;
@@ -25,71 +26,80 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("/api")
 public class AuthController {
-    private final AccountServiceImpl accountService;
+
     private final JwtTokenUtils jwtTokenUtils;
     private final AuthenticationManager authenticationManager;
     private final CustomUserDetailsService userDetailsService;
     private final OtpService otpService;
 
 
-
     @PostMapping("/auth")
     public ResponseEntity<Object> createAuthToken(@RequestBody JwtRequest authRequest) {
-        Authentication authentication = new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword());
         try {
-            authenticationManager.authenticate(authentication);
+            Authentication authentication = authenticateUser(authRequest.getEmail(), authRequest.getPassword());
+            CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(authRequest.getEmail());
+
+            String token;
+            if (userDetails.isOTPEnabled()) {
+                otpService.generateOtp(userDetails.getUsername());
+                token = jwtTokenUtils.generateTokenOtp(userDetails);
+            } else {
+                token = jwtTokenUtils.generateToken(userDetails);
+            }
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            return new ResponseEntity<>(new JwtResponse(token), HttpStatus.OK);
+
         } catch (BadCredentialsException e) {
-            log.warn("authentication failed: invalid credential for user: {}", authRequest.getEmail());
-            return new ResponseEntity<>("wrong password or login", HttpStatus.UNAUTHORIZED);
-        }
-        CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(authRequest.getEmail());
-        if(userDetails.isOTPEnabled()){
-            otpService.generateOtp(userDetails.getUsername());
-            String token = jwtTokenUtils.generateTokenOtp(userDetails);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            return new ResponseEntity<>(new JwtResponse(token), HttpStatus.OK);
-        }
-        else {
-            String token = jwtTokenUtils.generateToken(userDetails);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            return new ResponseEntity<>(new JwtResponse(token), HttpStatus.OK);
+            log.warn("Authentication failed: invalid credentials for user: {}", authRequest.getEmail());
+            return new ResponseEntity<>("Wrong password or login", HttpStatus.UNAUTHORIZED);
+        } catch (Exception e) {
+            log.error("Error during authentication", e);
+            return new ResponseEntity<>("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-//    @PostMapping("verify-otp")
-//    public ResponseEntity<Object> verifyOtp(@RequestParam String otp){
-//        Account account= userDetailsService.getAuthenticatedUser();
-//        if(!otpService.verifyOtp(otp,account.getId())){
-//            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-//        }
-//        String token = jwtTokenUtils.generateToken(userDetails);
-//        SecurityContextHolder.getContext().setAuthentication(authentication);
-//        return new ResponseEntity<>(new JwtResponse(token), HttpStatus.OK);
-//    }
+
+    private Authentication authenticateUser(String email, String password) throws BadCredentialsException {
+        Authentication authentication = new UsernamePasswordAuthenticationToken(email, password);
+        authenticationManager.authenticate(authentication);
+        return authentication;
+    }
+
     @PostMapping("/verify-otp")
     public ResponseEntity<Object> verifyOtp(@RequestHeader("Authorization") String authorizationHeader, @RequestParam String otp) {
         try {
-            if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-                return new ResponseEntity<>("Missing or invalid Authorization header", HttpStatus.UNAUTHORIZED);
+
+            String jwtToken = authorizationHeader.substring(7);
+            String email = jwtTokenUtils.getUsername(jwtToken);
+
+
+            if (jwtTokenUtils.isOtpToken(jwtToken)) {
+                if (otpService.verifyOtp(otp, email)) {
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+                    String finalToken = jwtTokenUtils.generateToken(userDetails);
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities());
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                    return new ResponseEntity<>(new JwtResponse(finalToken), HttpStatus.OK);
+                } else {
+                    return new ResponseEntity<>("Invalid OTP", HttpStatus.UNAUTHORIZED);
+                }
+            } else {
+                return new ResponseEntity<>("Access denied", HttpStatus.FORBIDDEN);
             }
 
-            String jwtToken = authorizationHeader.substring(7); // Удаление префикса "Bearer "
-            String email = jwtTokenUtils.getUsername(jwtToken);
-            if (email == null) {
-                return new ResponseEntity<>("Invalid JWT token", HttpStatus.UNAUTHORIZED);
-            }
-            if (otpService.verifyOtp(otp,email)) {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-                String finalToken = jwtTokenUtils.generateToken(userDetails);
-                return new ResponseEntity<>(new JwtResponse(finalToken), HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>("Invalid OTP", HttpStatus.UNAUTHORIZED);
-            }
+        } catch (OtpNotEnabledException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (OtpNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (OtpExpiredException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch (Exception e) {
             log.error("Error verifying OTP", e);
             return new ResponseEntity<>("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
 //    @PostMapping("/logout")
 //    public String logoutPage (HttpServletRequest request, HttpServletResponse response) {
 //        HttpSession session = request.getSession(false);

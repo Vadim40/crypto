@@ -11,6 +11,8 @@ public interface AccountService {
 
     void deleteAccount(String email);
 
-    void enableTfa(String email);
+    void enable2fa(String email);
+
+    void disable2fa(String email);
 
 }

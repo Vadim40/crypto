@@ -41,9 +41,16 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public void enableTfa(String email) {
-        Account account=findAccountByEmail(email);
-        account.setOTPEnabled(true);
+    public void enable2fa(String email) {
+        Account account = findAccountByEmail(email);
+        account.setOtpEnabled(true);
+        accountRepository.save(account);
+    }
+
+    @Override
+    public void disable2fa(String email) {
+        Account account = findAccountByEmail(email);
+        account.setOtpEnabled(false);
         accountRepository.save(account);
     }
 
