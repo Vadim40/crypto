@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 @Entity
 @Table
-public class OTP {
+public class Otp {
     @Id
     private Long id;
 
@@ -14,7 +14,8 @@ public class OTP {
     @MapsId
     @JoinColumn
     private Account account;
-
+    @Column
+    private String otp;
 
 
 }

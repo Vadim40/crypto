@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Data
 @AllArgsConstructor
@@ -33,6 +32,8 @@ public class Account {
     @Column(name = "role")
     private List<Role> roles = new ArrayList<>();
     @OneToOne(mappedBy = "account")
-    private OTP otp;
+    private Otp otp =new Otp();
 
+    @Column
+    private boolean isOTPEnabled ;
 }

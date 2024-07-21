@@ -49,6 +49,7 @@ public class SecurityConfig {
                 .cors().disable()
                 .authorizeHttpRequests()
                 .requestMatchers(HttpMethod.POST,"/api/auth").permitAll()
+                .requestMatchers(HttpMethod.POST,"/api/verify-otp").hasAnyRole("USER","ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/account/**").permitAll()
                 .requestMatchers(HttpMethod.PUT, "/api/account/**").hasAnyRole("USER","ADMIN")
                 .anyRequest().authenticated()

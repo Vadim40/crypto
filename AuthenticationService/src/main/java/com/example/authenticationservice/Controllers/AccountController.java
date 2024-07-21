@@ -61,4 +61,11 @@ public class AccountController {
         accountService.saveAccount(account);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @PutMapping("/enable-tfa")
+    public ResponseEntity<Object> enableTfa(){
+       Account account =userDetailsService.getAuthenticatedUser();
+       accountService.enableTfa(account.getEmail());
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

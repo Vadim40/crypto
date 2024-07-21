@@ -50,6 +50,22 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             );
             SecurityContextHolder.getContext().setAuthentication(token);
         }
+//        if (request.getRequestURI().equals("/api/verify-otp")) {
+//            String otpClaim = jwtTokenUtils.extractClaimFromJwt(jwt, "otp");
+//            if (otpClaim == null) {
+//                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+//                response.getWriter().write("Missing OTP claim");
+//                return;
+//            }
+//        } else {
+//            String otpClaim = jwtTokenUtils.extractClaimFromJwt(jwt, "otp");
+//            if (otpClaim != null) {
+//                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+//                response.getWriter().write("Access denied");
+//                return;
+//            }
+//        }
+
         filterChain.doFilter(request, response);
     }
 }

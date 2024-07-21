@@ -38,6 +38,25 @@ public class JwtTokenUtils {
                 .signWith(SignatureAlgorithm.HS256, secret)
                 .compact();
     }
+    public String generateTokenOtp(UserDetails userDetails){
+        Map<String, Object> claims = new HashMap<>();
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
+
+        claims.put("otp", true);
+        claims.put("roles", roles);
+        Date issuedDate = new Date();
+        Duration lifeTime=Duration.ofMinutes(5);
+        Date expiredDate = new Date(issuedDate.getTime() + lifeTime.toMillis());
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(issuedDate)
+                .setExpiration(expiredDate)
+                .signWith(SignatureAlgorithm.HS256, secret)
+                .compact();
+    }
 
     public String getUsername(String token) {
         return getAllClaimsFromToken(token).getSubject();
@@ -46,6 +65,11 @@ public class JwtTokenUtils {
     public List<String> getRoles(String token) {
         return getAllClaimsFromToken(token).get("roles", List.class);
     }
+    public String extractClaimFromJwt(String token, String claimKey) {
+        Claims claims = getAllClaimsFromToken(token);
+        return claims.get(claimKey, String.class);
+    }
+
 
     private Claims getAllClaimsFromToken(String token) {
         return Jwts.parser()

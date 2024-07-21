@@ -39,4 +39,13 @@ public class AccountServiceImpl implements AccountService {
     public void deleteAccount(String email) {
         accountRepository.deleteAccountByEmail(email);
     }
+
+    @Override
+    public void enableTfa(String email) {
+        Account account=findAccountByEmail(email);
+        account.setOTPEnabled(true);
+        accountRepository.save(account);
+    }
+
+
 }

@@ -2,6 +2,7 @@ package com.example.authenticationservice.Services;
 
 
 import com.example.authenticationservice.Models.Account;
+import com.example.authenticationservice.Models.CustomUserDetails;
 import com.example.authenticationservice.Repositories.AccountRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,16 +27,15 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-
-        Account account =accountRepository.findAccountByEmail(email).orElseThrow(() ->
+        Account account = accountRepository.findAccountByEmail(email).orElseThrow(() ->
                 new UsernameNotFoundException("User not found"));
-        System.out.println(account);
         Set<GrantedAuthority> authorities = account.getRoles().stream()
                 .map(role -> new SimpleGrantedAuthority(role.name()))
                 .collect(Collectors.toSet());
 
-        return new org.springframework.security.core.userdetails.User(account.getEmail(), account.getPassword(), authorities);
+        return new CustomUserDetails(account.getEmail(), account.getPassword(), authorities, account.isOTPEnabled());
     }
+
     public boolean isUserAuthenticated() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication != null
