@@ -11,10 +11,10 @@ import java.util.List;
 import java.util.Map;
 
 @Data
-public class ValidationErrorResponse {
+public class ResponseValidationError {
     private Map<String, List<String>> errors;
 
-    public ValidationErrorResponse(BindingResult bindingResult) {
+    public ResponseValidationError(BindingResult bindingResult) {
         this.errors = new HashMap<>();
         bindingResult.getAllErrors().forEach(error -> {
             String fieldName = getErrorFieldName(error);

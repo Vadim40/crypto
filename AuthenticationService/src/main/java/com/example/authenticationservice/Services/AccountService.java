@@ -11,8 +11,11 @@ public interface AccountService {
 
     void deleteAccount(String email);
 
-    void enable2fa(String email);
+    void enable2fa();
 
-    void disable2fa(String email);
+    void disable2fa();
 
+    void comparePassword(String oldPassword);
+
+    void changePassword(String newPassword);
 }
