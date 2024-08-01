@@ -1,4 +1,4 @@
-package com.example.authenticationservice.Services;
+package com.example.authenticationservice.Services.Interfaces;
 
 import com.example.authenticationservice.Models.Account;
 

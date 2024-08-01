@@ -1,10 +1,10 @@
-package com.example.authenticationservice.Services;
+package com.example.authenticationservice.Services.Interfaces;
 
 import com.example.authenticationservice.Models.Otp;
 
 public interface OtpService {
     Otp generateOtp(String email);
-    boolean verifyOtp(String otp, String username);
+    void approveOtp(String otp, String username);
     Otp findOtpById(Long id);
 
     Otp saveOtp(Otp otp);
@@ -12,4 +12,5 @@ public interface OtpService {
     Otp updateOtpById(Otp otp, Long id);
 
     void deleteOtp(Long id);
+
 }

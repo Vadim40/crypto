@@ -29,5 +29,22 @@ public class GlobalExceptionHandler {
         log.warn(ex.getMessage());
         return new ResponseEntity<>(ex.getMessage(),HttpStatus.BAD_REQUEST);
     }
+    @ExceptionHandler(OtpNotFoundException.class)
+    public ResponseEntity<String> handleOtpNotFoundException(OtpNotFoundException ex) {
+        log.warn( ex.getMessage());
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
 
+    @ExceptionHandler(OtpNotEnabledException.class)
+    public ResponseEntity<String> handleOtpNotEnabledException(OtpNotEnabledException ex) {
+        log.warn( ex.getMessage());
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+
+    @ExceptionHandler(OtpExpiredException.class)
+    public ResponseEntity<String> handleOtpExpiredException(OtpExpiredException ex) {
+        log.warn(ex.getMessage());
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
 }

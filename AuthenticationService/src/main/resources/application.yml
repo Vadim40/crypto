@@ -15,3 +15,5 @@ spring:
 jwt:
   secret: 2$2a$12$uHQpJLE9OUEEqeKQg48CYOLC
   lifetime: 30m
+otp:
+  lifetime: 5m

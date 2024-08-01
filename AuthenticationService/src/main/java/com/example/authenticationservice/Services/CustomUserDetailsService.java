@@ -7,6 +7,7 @@ import com.example.authenticationservice.Repositories.AccountRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Set;
 import java.util.stream.Collectors;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -42,13 +44,23 @@ public class CustomUserDetailsService implements UserDetailsService {
                 && authentication.isAuthenticated()
                 && !(authentication instanceof AnonymousAuthenticationToken);
     }
+    public boolean isOtpEnabled(String email){
+        CustomUserDetails userDetails= (CustomUserDetails)loadUserByUsername(email);
+        return userDetails.isOTPEnabled();
+    }
 
     public Account getAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        log.info("authenticated user: {}", (authentication.getName() +" "+authentication.getAuthorities()));
+        log.info("authenticated user: {}", (authentication.getName() + " " + authentication.getAuthorities()));
         String email = authentication.getName();
         return accountRepository.findAccountByEmail(email).orElseThrow(() -> new AuthenticationException("Not authenticated user") {
         });
     }
 
+
+    public void authenticateUser(UserDetails userDetails) {
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                userDetails, null, userDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
 }

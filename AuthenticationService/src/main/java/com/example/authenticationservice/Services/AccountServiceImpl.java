@@ -5,6 +5,7 @@ import com.example.authenticationservice.Exceptions.PasswordNotMatchException;
 import com.example.authenticationservice.Models.Account;
 import com.example.authenticationservice.Models.Enums.Role;
 import com.example.authenticationservice.Repositories.AccountRepository;
+import com.example.authenticationservice.Services.Interfaces.AccountService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
