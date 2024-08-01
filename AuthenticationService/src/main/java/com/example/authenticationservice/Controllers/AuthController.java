@@ -20,9 +20,8 @@ public class AuthController {
 
     @PostMapping("/auth")
     public ResponseEntity<Object> createAuthToken(@RequestBody JwtRequest authRequest) {
-
-        String token = authenticationService.generateJwtBasedOnOtp(authRequest.getEmail());
-        return new ResponseEntity<>(new JwtResponse(token), HttpStatus.OK);
+        JwtResponse jwtResponse = new JwtResponse(authenticationService.generateJwtBasedOnOtp(authRequest.getEmail()));
+        return new ResponseEntity<>(jwtResponse, HttpStatus.OK);
     }
 
 
@@ -30,8 +29,8 @@ public class AuthController {
     public ResponseEntity<Object> verifyOtp(@RequestHeader("Authorization") String authorizationHeader, @RequestParam String otp) {
 
         String jwtToken = authorizationHeader.substring(7);
-        authenticationService.verifyOtpAndGenerateJwt(jwtToken, otp);
-        return new ResponseEntity<>(HttpStatus.OK);
+        JwtResponse jwtResponse = new JwtResponse(authenticationService.verifyOtpAndGenerateJwt(jwtToken, otp));
+        return new ResponseEntity<>(jwtResponse, HttpStatus.OK);
     }
 //    @PostMapping("/logout")
 //    public String logoutPage (HttpServletRequest request, HttpServletResponse response) {

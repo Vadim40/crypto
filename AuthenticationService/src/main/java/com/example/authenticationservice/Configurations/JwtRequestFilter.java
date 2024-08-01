@@ -7,10 +7,10 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,6 +19,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.stream.Collectors;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -39,10 +40,13 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 username = jwtTokenUtils.getUsername(jwt);
                 isOtpToken = jwtTokenUtils.isOtpToken(jwt);
             } catch (ExpiredJwtException e) {
-
                 log.error("Token lifetime has expired");
+                handleException(response, "Token lifetime has expired", HttpStatus.UNAUTHORIZED);
+                return;
             } catch (SignatureException e) {
                 log.error("The token signature is incorrect");
+                handleException(response, "The token signature is incorrect", HttpStatus.UNAUTHORIZED);
+                return;
             }
         }
 
@@ -64,5 +68,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         } else {
             filterChain.doFilter(request, response);
         }
+    }
+
+    private void handleException(HttpServletResponse response, String message, HttpStatus status) throws IOException {
+        response.setStatus(status.value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.getWriter().write("{\"error\": \"" + message + "\"}");
     }
 }
