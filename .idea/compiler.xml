@@ -7,6 +7,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="config-server" />
+        <module name="discovery" />
         <module name="authentication" />
       </profile>
     </annotationProcessing>
@@ -22,6 +23,7 @@
       <module name="EmailService" options="-parameters" />
       <module name="authentication" options="-parameters" />
       <module name="config-server" options="-parameters" />
+      <module name="discovery" options="-parameters" />
     </option>
   </component>
 </project>
