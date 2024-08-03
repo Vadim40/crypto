@@ -7,10 +7,11 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
-    List<Transaction> findTransactionByTransactionType(TransactionType transactionType);
+   Optional<List<Transaction>> findTransactionByTransactionType(TransactionType transactionType);
 
-    List<Transaction> findTransactionByTransactionDateAfter(LocalDate localDate);
+   Optional<List<Transaction>> findTransactionByTransactionDateAfter(LocalDate localDate);
 }
