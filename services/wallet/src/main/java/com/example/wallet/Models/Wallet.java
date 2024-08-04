@@ -18,11 +18,11 @@ public class Wallet {
     private Long id;
 
     @Column(name = "account_id", nullable = false)
-    private String accountId;
+    private Long accountId;
     @Column(name = "address", nullable = false)
     private String address;
     @OneToMany(mappedBy = "wallet", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Token> tokens = new HashSet<>(); // Список токенов в кошельке
+    private Set<Token> tokens = new HashSet<>();
 
 
 }

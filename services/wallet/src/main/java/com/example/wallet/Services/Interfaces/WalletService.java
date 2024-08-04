@@ -12,4 +12,6 @@ public interface WalletService {
     Wallet findWalletById(Long id);
 
     Wallet findWalletByAddress(String address);
+
+    Wallet findWalletByAccountId(Long id);
 }

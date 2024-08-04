@@ -57,5 +57,11 @@ public class WalletServiceImpl implements WalletService {
                 new WalletNotFoundException("wallet not found by this address: " + address));
     }
 
+    @Override
+    public Wallet findWalletByAccountId(Long accountId) {
+        return walletRepository.findWalletByAccountId(accountId).orElseThrow(() ->
+                new WalletNotFoundException("wallet not found "));
+    }
+
 
 }

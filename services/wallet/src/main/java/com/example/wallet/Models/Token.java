@@ -10,7 +10,10 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Data
 @Entity
-@Table(name = "token")
+@Table(name = "token",
+        indexes = {
+                @Index(name = "idx_wallet_token_type", columnList = "wallet_id, token_type")
+        })
 public class Token {
 
     @Id
