@@ -1,16 +1,9 @@
-server:
-  port: 8081
-spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5434/wallet_service
-    username: user
-    password: pass
-  jpa:
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+
 
 jwt:
   secret: 2$2a$12$uHQpJLE9OUEEqeKQg48CYOLC
+spring:
+  config:
+    import: optional:configserver:http://localhost:8888
+  application:
+    name: wallet-service
