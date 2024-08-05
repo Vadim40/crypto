@@ -27,10 +27,9 @@ public class AuthController {
 
 
     @PostMapping("/verify-otp")
-    public ResponseEntity<Object> verifyOtp(@RequestHeader("Authorization") String authorizationHeader, @RequestParam String otp) {
+    public ResponseEntity<Object> verifyOtp( @RequestParam String otp) {
 
-        String jwtToken = authorizationHeader.substring(7);
-        JwtResponse jwtResponse = new JwtResponse(authenticationService.verifyOtpAndGenerateJwt(jwtToken, otp));
+        JwtResponse jwtResponse = new JwtResponse(authenticationService.verifyOtpAndGenerateJwt(otp));
         return new ResponseEntity<>(jwtResponse, HttpStatus.OK);
     }
 //    @PostMapping("/logout")

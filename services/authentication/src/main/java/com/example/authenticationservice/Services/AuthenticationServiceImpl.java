@@ -8,6 +8,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,8 +20,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final AuthenticationManager authenticationManager;
 
     @Override
-    public String verifyOtpAndGenerateJwt(String jwtToken, String otp) {
-        String email = jwtTokenService.getUsername(jwtToken);
+    public String verifyOtpAndGenerateJwt( String otp) {
+       String email=userDetailsService.getAuthenticatedUser().getEmail();
         otpService.approveOtp(otp, email);
         return jwtTokenService.generateToken(email);
     }

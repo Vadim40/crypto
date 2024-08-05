@@ -18,4 +18,6 @@ public interface AccountService {
     void comparePassword(String oldPassword);
 
     void changePassword(String newPassword);
+
+    boolean isEmailExists(String email);
 }

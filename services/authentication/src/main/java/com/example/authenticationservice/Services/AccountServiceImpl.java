@@ -74,5 +74,10 @@ public class AccountServiceImpl implements AccountService {
         saveAccount(account);
     }
 
+    @Override
+    public boolean isEmailExists(String email) {
+        return accountRepository.existsByEmail(email);
+    }
+
 
 }

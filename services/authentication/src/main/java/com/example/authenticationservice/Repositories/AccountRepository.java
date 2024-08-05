@@ -13,5 +13,7 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
 
      void deleteAccountByEmail(String username);
 
+     boolean existsByEmail(String email);
+
 
 }
