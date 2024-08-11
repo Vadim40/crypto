@@ -79,5 +79,10 @@ public class AccountServiceImpl implements AccountService {
         return accountRepository.existsByEmail(email);
     }
 
+    @Override
+    public void deleteAllAccounts() {
+        accountRepository.deleteAll();
+    }
+
 
 }

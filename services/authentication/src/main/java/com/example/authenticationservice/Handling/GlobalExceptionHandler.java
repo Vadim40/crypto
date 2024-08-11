@@ -68,7 +68,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(OtpNotEnabledException.class)
     public ResponseEntity<ErrorResponse> handleOtpNotEnabledException(OtpNotEnabledException ex, HttpServletRequest request) {
         ErrorResponse errorResponse = new ErrorResponse(
-                "OTP Not Enabled",
+                "OTP is not Enabled",
                 ex.getMessage(),
                 HttpStatus.BAD_REQUEST.value(),
                 request.getRequestURI()

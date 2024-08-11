@@ -20,4 +20,6 @@ public interface AccountService {
     void changePassword(String newPassword);
 
     boolean isEmailExists(String email);
+
+    void deleteAllAccounts();
 }

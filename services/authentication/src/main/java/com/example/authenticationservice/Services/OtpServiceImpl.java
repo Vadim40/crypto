@@ -2,6 +2,7 @@ package com.example.authenticationservice.Services;
 
 import com.example.authenticationservice.Exceptions.InvalidOtpException;
 import com.example.authenticationservice.Exceptions.OtpExpiredException;
+import com.example.authenticationservice.Exceptions.OtpNotEnabledException;
 import com.example.authenticationservice.Exceptions.OtpNotFoundException;
 import com.example.authenticationservice.Models.Account;
 import com.example.authenticationservice.Models.Otp;
@@ -32,13 +33,13 @@ public class OtpServiceImpl implements OtpService {
 
 
     @Override
-    public Otp generateOtp(String email) {
+    public String generateOtp(String email) {
         int otpCode = generateOtpCode();
         Account account = accountService.findAccountByEmail(email);
         Otp otp = createOtp(otpCode, account);
         otpRepository.save(otp);
         log.info("Otp code: " + otpCode);
-        return otp;
+        return String.valueOf(otpCode);
     }
 
     private int generateOtpCode() {
@@ -66,7 +67,7 @@ public class OtpServiceImpl implements OtpService {
 
     private void checkOtpEnabled(Account account) {
         if (!account.isOtpEnabled()) {
-            throw new OtpNotFoundException("OTP is not enabled for this account");
+            throw new OtpNotEnabledException("OTP is not enabled for this account");
         }
     }
 

@@ -3,7 +3,7 @@ package com.example.authenticationservice.Services.Interfaces;
 import com.example.authenticationservice.Models.Otp;
 
 public interface OtpService {
-    Otp generateOtp(String email);
+    String generateOtp(String email);
     void approveOtp(String otp, String username);
     Otp findOtpById(Long id);
 

@@ -59,13 +59,20 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             SecurityContextHolder.getContext().setAuthentication(token);
         }
 
-        if (isOtpToken) {
-            if (request.getRequestURI().equals("/api/verify-otp")) {
+        if (request.getRequestURI().equals("/api/verify-otp")) {
+            if (isOtpToken) {
                 filterChain.doFilter(request, response);
             } else {
-                response.setStatus(HttpStatus.FORBIDDEN.value());
+                log.error("Final token cannot be used for OTP verification");
+                handleException(response, "Final token cannot be used for OTP verification", HttpStatus.FORBIDDEN);
+                return;
             }
         } else {
+            if (isOtpToken) {
+                log.error("OTP token can only be used for OTP verification");
+                handleException(response, "OTP token can only be used for OTP verification", HttpStatus.FORBIDDEN);
+                return;
+            }
             filterChain.doFilter(request, response);
         }
     }
