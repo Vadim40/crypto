@@ -22,4 +22,6 @@ public interface AccountService {
     boolean isEmailExists(String email);
 
     void deleteAllAccounts();
+
+    Account findAccountById(Long accountId);
 }

@@ -2,6 +2,7 @@ package com.example.authenticationservice.Controllers;
 
 import com.example.authenticationservice.Mappers.AccountMapper;
 import com.example.authenticationservice.Models.Account;
+import com.example.authenticationservice.Models.DTOs.AccountCreationRequest;
 import com.example.authenticationservice.Models.DTOs.AccountDTO;
 import com.example.authenticationservice.Services.AccountServiceImpl;
 import jakarta.validation.Valid;
@@ -14,16 +15,27 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/account")
+@RequestMapping("/api/v1/account")
 public class AccountController {
 
     private final AccountServiceImpl accountService;
     private final AccountMapper accountMapper;
 
-
+    @GetMapping("/id/{account-id}")
+    public ResponseEntity<Object> findAccountById(@PathVariable("account-id") Long accountId){
+        Account account=accountService.findAccountById(accountId);
+        AccountDTO accountDTO=accountMapper.mapAccountToAccountDTO(account);
+        return new ResponseEntity<>(accountDTO,HttpStatus.OK);
+    }
+    @GetMapping("/email/{username}")
+    public ResponseEntity<Object> findAccountByEmail(@PathVariable("username") String email){
+        Account account=accountService.findAccountByEmail(email);
+        AccountDTO accountDTO=accountMapper.mapAccountToAccountDTO(account);
+        return new ResponseEntity<>(accountDTO,HttpStatus.OK);
+    }
     @PostMapping("/sign-up")
-    public ResponseEntity<Object> createAccount(@RequestBody @Valid AccountDTO accountDTO) {
-        Account account = accountMapper.mapAccountDTOToAccount(accountDTO);
+    public ResponseEntity<Object> createAccount(@RequestBody @Valid AccountCreationRequest accountCreationRequest) {
+        Account account = accountMapper.mapAccountCreationRequestToAccount(accountCreationRequest);
         accountService.saveAccount(account);
         return new ResponseEntity<>(HttpStatus.OK);
     }
