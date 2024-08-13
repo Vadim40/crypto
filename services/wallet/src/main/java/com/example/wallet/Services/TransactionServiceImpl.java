@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -45,17 +46,40 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public Transaction findTransactionById(Long id) {
-        return transactionRepository.findById(id).orElseThrow(() -> new TransactionNotFoundException("Transaction not found"));
+        return transactionRepository.findById(id)
+                .orElseThrow(() -> new TransactionNotFoundException("Transaction not found"));
     }
 
-        @Override
-        @Transactional
-        public void transferTokens(String addressDestination, String tokenType, BigDecimal amount) {
-            AccountResponse accountResponse=accountService.getCurrentAccount();
-           processTokenTransfer(accountResponse, addressDestination, tokenType, amount);
-        }
+    @Override
+    @Transactional
+    public void transferTokens(String addressDestination, String tokenType, BigDecimal amount) {
+        AccountResponse accountResponse = accountService.getCurrentAccount();
+        processTokenTransfer(accountResponse, addressDestination, tokenType, amount);
+    }
 
-        private void processTokenTransfer(AccountResponse accountResponse, String addressDestination, String tokenType, BigDecimal amount) {
+    @Override
+    public List<Transaction> findTransactionsByType(TransactionType transactionType) {
+        Long accountId=accountService.getCurrentAccount().id();
+        return transactionRepository.findTransactionsByTransactionTypeAndAccountId(transactionType, accountId)
+                .orElseThrow(() -> new TransactionNotFoundException("Transactions not found for type: " + transactionType));
+    }
+
+
+    @Override
+    public List<Transaction> findTransactionsAfterDate(LocalDate localDate) {
+        Long accountId=accountService.getCurrentAccount().id();
+        return transactionRepository.findTransactionsByTransactionDateAfterAndAccountId(localDate, accountId)
+                .orElseThrow(() -> new TransactionNotFoundException("Transactions not found after: " + localDate));
+    }
+
+    @Override
+    public List<Transaction> findAllTransactions() {
+        Long accountId=accountService.getCurrentAccount().id();
+        return transactionRepository.findTransactionsByAccountId(accountId)
+                .orElseThrow(() -> new TransactionNotFoundException("Transactions not found"));
+    }
+
+    private void processTokenTransfer(AccountResponse accountResponse, String addressDestination, String tokenType, BigDecimal amount) {
         Wallet sourceWallet = walletService.findWalletByAccountId(accountResponse.id());
         Wallet destinationWallet = walletService.findWalletByAddress(addressDestination);
 
@@ -65,15 +89,15 @@ public class TransactionServiceImpl implements TransactionService {
         transactionRepository.save(transaction);
     }
 
-        private Transaction createTransaction(Long accountId, Wallet sourceWallet, Wallet destinationWallet, String tokenType, BigDecimal amount) {
-            Transaction transaction = new Transaction();
-            transaction.setAccountId(accountId);
-            transaction.setTransactionType(TransactionType.TRANSFER);
-            transaction.setSourceWallet(sourceWallet);
-            transaction.setDestinationWallet(destinationWallet);
-            transaction.setTokenType(tokenType);
-            transaction.setAmount(amount);
-            transaction.setTransactionDate(LocalDate.now());
-            return transaction;
-        }
+    private Transaction createTransaction(Long accountId, Wallet sourceWallet, Wallet destinationWallet, String tokenType, BigDecimal amount) {
+        Transaction transaction = new Transaction();
+        transaction.setAccountId(accountId);
+        transaction.setTransactionType(TransactionType.TRANSFER);
+        transaction.setSourceWallet(sourceWallet);
+        transaction.setDestinationWallet(destinationWallet);
+        transaction.setTokenType(tokenType);
+        transaction.setAmount(amount);
+        transaction.setTransactionDate(LocalDate.now());
+        return transaction;
+    }
 }

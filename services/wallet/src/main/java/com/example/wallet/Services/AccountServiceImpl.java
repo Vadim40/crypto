@@ -1,7 +1,6 @@
 package com.example.wallet.Services;
 
 import com.example.wallet.Client.AuthenticationClient;
-import com.example.wallet.Exceptions.BusinessException;
 import com.example.wallet.Models.DTO.AccountResponse;
 import com.example.wallet.Services.Interfaces.AccountService;
 import com.example.wallet.Utils.JwtTokenUtils;
