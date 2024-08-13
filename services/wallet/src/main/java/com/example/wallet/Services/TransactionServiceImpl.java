@@ -1,16 +1,16 @@
 package com.example.wallet.Services;
 
 import com.example.wallet.Exceptions.TransactionNotFoundException;
+import com.example.wallet.Models.DTO.AccountResponse;
 import com.example.wallet.Models.Enum.TransactionType;
 import com.example.wallet.Models.Transaction;
 import com.example.wallet.Models.Wallet;
 import com.example.wallet.Repositories.TransactionRepository;
+import com.example.wallet.Services.Interfaces.AccountService;
 import com.example.wallet.Services.Interfaces.TokenService;
 import com.example.wallet.Services.Interfaces.TransactionService;
 import com.example.wallet.Services.Interfaces.WalletService;
-import com.example.wallet.Utils.JwtTokenUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,8 +22,10 @@ import java.time.LocalDate;
 public class TransactionServiceImpl implements TransactionService {
     private final TokenService tokenService;
     private final TransactionRepository transactionRepository;
-    private final JwtTokenUtils jwtTokenUtils;
+
     private final WalletService walletService;
+
+    private final AccountService accountService;
 
     @Override
     public Transaction saveTransaction(Transaction transaction) {
@@ -49,25 +51,20 @@ public class TransactionServiceImpl implements TransactionService {
         @Override
         @Transactional
         public void transferTokens(String addressDestination, String tokenType, BigDecimal amount) {
-            String username = getCurrentUsername();
-            // will changed in the future
-            // retrieveAccountIdFromAuthenticationService();
-            Long accountId =1L;
-
-            Wallet sourceWallet = walletService.findWalletByAccountId(accountId);
-
-            Wallet destinationWallet = walletService.findWalletByAddress(addressDestination);
-
-            tokenService.TransferTokens(tokenType,amount, sourceWallet, destinationWallet);
-
-            Transaction transaction = createTransaction(accountId, sourceWallet, destinationWallet, tokenType, amount);
-            transactionRepository.save(transaction);
+            AccountResponse accountResponse=accountService.getCurrentAccount();
+           processTokenTransfer(accountResponse, addressDestination, tokenType, amount);
         }
 
-        private String getCurrentUsername() {
-            String jwt =  SecurityContextHolder.getContext().getAuthentication().getCredentials().toString();
-            return jwtTokenUtils.getUsername(jwt);
-        }
+        private void processTokenTransfer(AccountResponse accountResponse, String addressDestination, String tokenType, BigDecimal amount) {
+        Wallet sourceWallet = walletService.findWalletByAccountId(accountResponse.id());
+        Wallet destinationWallet = walletService.findWalletByAddress(addressDestination);
+
+        tokenService.TransferTokens(tokenType, amount, sourceWallet, destinationWallet);
+
+        Transaction transaction = createTransaction(accountResponse.id(), sourceWallet, destinationWallet, tokenType, amount);
+        transactionRepository.save(transaction);
+    }
+
         private Transaction createTransaction(Long accountId, Wallet sourceWallet, Wallet destinationWallet, String tokenType, BigDecimal amount) {
             Transaction transaction = new Transaction();
             transaction.setAccountId(accountId);

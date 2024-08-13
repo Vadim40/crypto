@@ -12,3 +12,7 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 server:
   port: 8070
+
+application:
+  config:
+    authentication-url:http://localhost:8222/api/v1/account
