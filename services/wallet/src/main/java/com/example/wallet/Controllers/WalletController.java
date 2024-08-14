@@ -18,16 +18,18 @@ import org.springframework.web.bind.annotation.RestController;
 public class WalletController {
     private final WalletService walletService;
     private final WalletMapper walletMapper;
+
     @GetMapping("/address/{address}")
-    public ResponseEntity<WalletDTO> findWalletByAddress(@PathVariable("address") String address){
-        Wallet wallet=walletService.findWalletByAddress(address);
-        WalletDTO walletDTO=walletMapper.mapWalletToWalletDTO(wallet);
+    public ResponseEntity<WalletDTO> findWalletByAddress(@PathVariable("address") String address) {
+        Wallet wallet = walletService.findWalletByAddress(address);
+        WalletDTO walletDTO = walletMapper.mapWalletToWalletDTO(wallet);
         return new ResponseEntity<>(walletDTO, HttpStatus.OK);
     }
+
     @GetMapping("/id/{id}")
-    public ResponseEntity<WalletDTO> findWalletById(@PathVariable("id") Long id){
-        Wallet wallet=walletService.findWalletById(id);
-        WalletDTO walletDTO=walletMapper.mapWalletToWalletDTO(wallet);
+    public ResponseEntity<WalletDTO> findWalletById(@PathVariable("id") Long id) {
+        Wallet wallet = walletService.findWalletById(id);
+        WalletDTO walletDTO = walletMapper.mapWalletToWalletDTO(wallet);
         return new ResponseEntity<>(walletDTO, HttpStatus.OK);
     }
 }

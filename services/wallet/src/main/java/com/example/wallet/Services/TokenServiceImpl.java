@@ -36,35 +36,46 @@ public class TokenServiceImpl implements TokenService {
 
     @Override
     public Token findTokenById(Long id) {
-        return tokenRepository.findById(id).orElseThrow(() -> new TokenNotFoundException("token not found"));
+        return tokenRepository.findById(id).orElseThrow(() -> new TokenNotFoundException("Token not found"));
     }
 
     @Override
-    public Token findTokenByTokenTypeAndWallet(String type, Wallet wallet) {
-        return tokenRepository.findTokenByTokenTypeAndWallet(type, wallet).orElseThrow(() -> new TokenNotFoundException("token not found"));
+    public Token findTokenByTokenTypeAndWallet(String toketType, Wallet wallet) {
+        return tokenRepository.findTokenByTokenTypeAndWallet(toketType, wallet)
+                .orElseThrow(() -> new TokenNotFoundException("Token not found: "+toketType));
     }
 
     @Override
     @Transactional
-    public void TransferTokens(String type, BigDecimal amount, Wallet sourceWallet, Wallet destinationWallet) {
-        Token sourceToken = findTokenByTokenTypeAndWallet(type, sourceWallet);
-        Token destinationToken = findTokenByTokenTypeAndWallet(type, destinationWallet);
-        decreaseAmount(sourceToken, amount);
-        increaseAmount(destinationToken, amount);
-        saveToken(sourceToken);
-        saveToken(destinationToken);
+    public void transferTokens(String tokenType, BigDecimal amount, Wallet sourceWallet, Wallet destinationWallet) {
+        addTokens(tokenType,amount, destinationWallet);
+        subtractTokens(tokenType, amount, sourceWallet);
+
     }
 
-    private void increaseAmount(Token token, BigDecimal amount) {
+    @Override
+    public void addTokens(String tokenType, BigDecimal amount, Wallet wallet) {
+        Token token=findTokenByTokenTypeAndWallet(tokenType, wallet);
         BigDecimal balance = token.getAmount().add(amount);
         token.setAmount(balance);
+       tokenRepository.save(token);
     }
 
-    private void decreaseAmount(Token token, BigDecimal amount) {
+    @Override
+    public void subtractTokens(String tokenType, BigDecimal amount, Wallet wallet) {
+        Token token=findTokenByTokenTypeAndWallet(tokenType, wallet);
         BigDecimal balance = token.getAmount().subtract(amount);
         if (balance.compareTo(BigDecimal.ZERO) < 0) {
-            throw new NotEnoughTokenAmountException("not enough amount of token");
+            throw new NotEnoughTokenAmountException(String.format(
+                    "Insufficient amount of token '%s' . Current balance: %s",
+                    tokenType,
+                    token.getAmount()
+
+            ));
         }
         token.setAmount(balance);
+        tokenRepository.save(token);
     }
+
+
 }

@@ -1,11 +1,11 @@
 package com.example.wallet.Controllers;
 
 import com.example.wallet.Mappers.TransactionMapper;
-import com.example.wallet.Models.DTO.TransactionDTO;
-import com.example.wallet.Models.DTO.TransferRequest;
+import com.example.wallet.Models.DTO.*;
 import com.example.wallet.Models.Enum.TransactionType;
 import com.example.wallet.Models.Transaction;
 import com.example.wallet.Services.Interfaces.TransactionService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -57,8 +57,23 @@ public class TransactionController {
     }
 
     @PostMapping("/transfer-tokens")
-    public ResponseEntity<Object> transferTokens(@RequestBody TransferRequest request){
-        //
+    public ResponseEntity<Object> transferTokens(@RequestBody @Valid TransferRequest request) {
+        transactionService.transferTokens(request.destinationAddress(), request.tokenType(), request.amount());
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+    @PostMapping("/deposit-tokens")
+    public ResponseEntity<Object> depositTokens(@RequestBody @Valid DepositRequest request) {
+        transactionService.depositTokens(request.tokenType(), request.amount());
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+    @PostMapping("/withdrawal-tokens")
+    public ResponseEntity<Object> withdrawalTokens(@RequestBody @Valid WithdrawalRequest request) {
+        transactionService.withdrawTokens(request.tokenType(), request.amount());
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+    @PostMapping("/receive-tokens")
+    public ResponseEntity<Object> receiveTokens(@RequestBody @Valid ReceiveRequest request) {
+        transactionService.receiveTokens(request.sourceAddress(), request.tokenType(), request.amount());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }
