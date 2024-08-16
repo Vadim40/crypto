@@ -6,4 +6,5 @@ public interface AccountService {
     AccountResponse getAccountByUsername(String email);
 
     AccountResponse getCurrentAccount();
+
 }

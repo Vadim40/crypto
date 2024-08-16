@@ -9,12 +9,16 @@ import org.springframework.stereotype.Component;
 public class TransactionMapper {
 
     public TransactionDTO mapTransactionToTransactionDTO(Transaction transaction) {
+
+        String sourceWalletAddress = (transaction.getSourceWallet() != null) ? transaction.getSourceWallet().getAddress() : null;
+        String destinationWalletAddress = (transaction.getDestinationWallet() != null) ? transaction.getDestinationWallet().getAddress() : null;
+
         return new TransactionDTO(
                 transaction.getId(),
                 transaction.getAccountId(),
                 transaction.getTransactionType(),
-                transaction.getSourceWallet().getAddress(),
-                transaction.getDestinationWallet().getAddress(),
+                sourceWalletAddress,
+                destinationWalletAddress,
                 transaction.getTokenType(),
                 transaction.getAmount(),
                 transaction.getTransactionDate()

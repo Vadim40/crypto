@@ -27,8 +27,8 @@ public class AccountController {
         AccountDTO accountDTO=accountMapper.mapAccountToAccountDTO(account);
         return new ResponseEntity<>(accountDTO,HttpStatus.OK);
     }
-    @GetMapping("/email/{username}")
-    public ResponseEntity<Object> findAccountByEmail(@PathVariable("username") String email){
+    @GetMapping("/email/{email}")
+    public ResponseEntity<Object> findAccountByEmail(@PathVariable("email") String email){
         Account account=accountService.findAccountByEmail(email);
         AccountDTO accountDTO=accountMapper.mapAccountToAccountDTO(account);
         return new ResponseEntity<>(accountDTO,HttpStatus.OK);

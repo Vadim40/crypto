@@ -39,17 +39,18 @@ class AuthControllerTest {
     private ObjectMapper objectMapper;
 
     @Autowired
-    AccountService accountService;
+    private AccountService accountService;
     @Autowired
     private OtpService otpService;
 
     @Autowired
-    JwtTokenUtils jwtTokenUtils;
+   private  JwtTokenUtils jwtTokenUtils;
 
     @Autowired
-    CustomUserDetailsService userDetailsService;
+    private CustomUserDetailsService userDetailsService;
+
     @BeforeEach
-    void setUp(){
+    void setUp() {
         accountService.deleteAllAccounts();
     }
 
@@ -68,8 +69,8 @@ class AuthControllerTest {
 
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/auth")
-                .content(jsonRequest)
-                .contentType(MediaType.APPLICATION_JSON))
+                        .content(jsonRequest)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
     }
@@ -89,8 +90,8 @@ class AuthControllerTest {
 
 
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post("/api/auth")
-                .content(jsonRequest)
-                .contentType(MediaType.APPLICATION_JSON))
+                        .content(jsonRequest)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -113,8 +114,8 @@ class AuthControllerTest {
 
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/auth")
-                .content(jsonRequest)
-                .contentType(MediaType.APPLICATION_JSON))
+                        .content(jsonRequest)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized());
 
     }
@@ -135,12 +136,13 @@ class AuthControllerTest {
         String jwtOtp = jwtTokenUtils.generateTokenOtp(customUserDetails);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/verify-otp")
-                        .param("otp",otp)
+                        .param("otp", otp)
                         .header("Authorization", "Bearer " + jwtOtp))
                 .andExpect(status().isOk());
 
 
     }
+
     @Test
     void verifyOtp__OtpIsNotEnabled() throws Exception {
         Account account = new Account();
@@ -156,12 +158,13 @@ class AuthControllerTest {
         String jwtOtp = jwtTokenUtils.generateTokenOtp(customUserDetails);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/verify-otp")
-                        .param("otp",otp)
+                        .param("otp", otp)
                         .header("Authorization", "Bearer " + jwtOtp))
                 .andExpect(status().isBadRequest());
 
 
     }
+
     @Test
     void verifyOtp_Forbidden_NotTokenOtp() throws Exception {
         Account account = new Account();
@@ -178,7 +181,7 @@ class AuthControllerTest {
         String jwt = jwtTokenUtils.generateToken(customUserDetails);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/verify-otp")
-                        .param("otp",otp)
+                        .param("otp", otp)
                         .header("Authorization", "Bearer " + jwt))
                 .andExpect(status().isForbidden());
 

@@ -25,6 +25,7 @@ public class Transaction {
     private Long accountId;
 
     @Column(name = "transaction_type", nullable = false)
+    @Enumerated
     private TransactionType transactionType;
 
     @ManyToOne
