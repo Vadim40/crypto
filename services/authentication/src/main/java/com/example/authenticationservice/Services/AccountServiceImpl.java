@@ -3,6 +3,7 @@ package com.example.authenticationservice.Services;
 import com.example.authenticationservice.Exceptions.AccountNotFoundException;
 import com.example.authenticationservice.Exceptions.PasswordNotMatchException;
 import com.example.authenticationservice.Models.Account;
+import com.example.authenticationservice.Models.DTOs.AccountCreationConfirmation;
 import com.example.authenticationservice.Models.Enums.Role;
 import com.example.authenticationservice.Repositories.AccountRepository;
 import com.example.authenticationservice.Services.Interfaces.AccountService;
@@ -20,8 +21,10 @@ import java.util.List;
 public class AccountServiceImpl implements AccountService {
     private final AccountRepository accountRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticationProducer authenticationProducer;
 
     private final CustomUserDetailsService userDetailsService;
+
     @Override
     public Account findAccountByEmail(String email) {
         return accountRepository.findAccountByEmail(email).orElseThrow(() -> new AccountNotFoundException("Account not found"));
@@ -31,7 +34,13 @@ public class AccountServiceImpl implements AccountService {
     public Account saveAccount(Account account) {
         account.setRoles(new ArrayList<>(List.of(Role.ROLE_USER)));
         account.setPassword(passwordEncoder.encode(account.getPassword()));
+        sendAccountCreationConfirmation(account);
         return accountRepository.save(account);
+    }
+
+    private void sendAccountCreationConfirmation(Account account) {
+        AccountCreationConfirmation accountCreationConfirmation = new AccountCreationConfirmation(account.getEmail(), account.getId());
+        authenticationProducer.sendAccountCreationConfirmation(accountCreationConfirmation);
     }
 
     @Override
@@ -47,14 +56,14 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public void enable2fa() {
-        Account account =userDetailsService.getAuthenticatedUser();
+        Account account = userDetailsService.getAuthenticatedUser();
         account.setOtpEnabled(true);
         accountRepository.save(account);
     }
 
     @Override
     public void disable2fa() {
-        Account account =userDetailsService.getAuthenticatedUser();
+        Account account = userDetailsService.getAuthenticatedUser();
         account.setOtpEnabled(false);
         accountRepository.save(account);
     }
