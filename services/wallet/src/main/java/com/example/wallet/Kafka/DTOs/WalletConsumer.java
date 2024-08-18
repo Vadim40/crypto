@@ -15,7 +15,7 @@ public class WalletConsumer {
     @KafkaListener(topics ="authentication-topic")
     public void consumeAccountCreationConfirmation(AccountCreationConfirmation creationConfirmation){
         log.info("Consuming the message from authentication-topic Topic: {}", creationConfirmation);
-        walletService.createWallet(creationConfirmation.id());
+        walletService.createAndSaveWallet(creationConfirmation.id());
     }
 
 

@@ -13,9 +13,8 @@ import java.security.SecureRandom;
 @RequiredArgsConstructor
 public class WalletServiceImpl implements WalletService {
     private final WalletRepository walletRepository;
-
-    @Override
-    public Wallet createWallet(Long accountId) {
+     @Override
+    public Wallet createAndSaveWallet(Long accountId) {
         Wallet wallet=new Wallet();
         wallet.setAccountId(accountId);
         String address=generateAddress();
@@ -36,11 +35,6 @@ public class WalletServiceImpl implements WalletService {
         return sb.toString();
     }
 
-    @Override
-    public Wallet updateWallet(Wallet wallet, Long id) {
-        wallet.setId(id);
-        return walletRepository.save(wallet);
-    }
 
     @Override
     public void deleteWallet(Long id) {

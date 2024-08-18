@@ -3,9 +3,8 @@ package com.example.wallet.Services.Interfaces;
 import com.example.wallet.Models.Wallet;
 
 public interface WalletService {
-    Wallet createWallet(Long accountId);
 
-    Wallet updateWallet(Wallet wallet, Long id);
+    Wallet createAndSaveWallet(Long accountId);
 
     void deleteWallet(Long id);
 

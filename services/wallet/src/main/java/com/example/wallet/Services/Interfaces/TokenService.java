@@ -6,9 +6,7 @@ import com.example.wallet.Models.Wallet;
 import java.math.BigDecimal;
 
 public interface TokenService {
-    Token saveToken(Token token);
 
-    Token updateToken(Token token, Long id);
 
     void deleteToken(Long id);
 

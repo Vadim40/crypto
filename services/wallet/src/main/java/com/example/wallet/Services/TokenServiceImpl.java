@@ -17,21 +17,10 @@ import java.math.BigDecimal;
 public class TokenServiceImpl implements TokenService {
     private final TokenRepository tokenRepository;
 
-    @Override
-    public Token saveToken(Token token) {
-        return tokenRepository.save(token);
-    }
-
-    @Override
-    public Token updateToken(Token token, Long id) {
-        token.setId(id);
-        return tokenRepository.save(token);
-    }
 
     @Override
     public void deleteToken(Long id) {
         tokenRepository.deleteById(id);
-
     }
 
     @Override
@@ -40,9 +29,9 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public Token findTokenByTokenTypeAndWallet(String toketType, Wallet wallet) {
-        return tokenRepository.findTokenByTokenTypeAndWallet(toketType, wallet)
-                .orElseThrow(() -> new TokenNotFoundException("Token not found: "+toketType));
+    public Token findTokenByTokenTypeAndWallet(String tokenType, Wallet wallet) {
+        return tokenRepository.findTokenByTokenTypeAndWallet(tokenType, wallet)
+                .orElseThrow(() -> new TokenNotFoundException("Token not found: "+tokenType));
     }
 
     @Override
@@ -55,7 +44,7 @@ public class TokenServiceImpl implements TokenService {
 
     @Override
     public void addTokens(String tokenType, BigDecimal amount, Wallet wallet) {
-        Token token=findTokenByTokenTypeAndWallet(tokenType, wallet);
+        Token token = getOrCreateToken(tokenType, wallet);
         BigDecimal balance = token.getAmount().add(amount);
         token.setAmount(balance);
        tokenRepository.save(token);
@@ -74,7 +63,26 @@ public class TokenServiceImpl implements TokenService {
             ));
         }
         token.setAmount(balance);
+        saveOrDeleteToken(token);
+    }
+
+    private void saveOrDeleteToken(Token token) {
+        if (token.getAmount().equals(BigDecimal.ZERO)){
+            tokenRepository.delete(token);
+        }
         tokenRepository.save(token);
+    }
+
+    private Token createNewToken(String tokenType, Wallet wallet) {
+        Token token = new Token();
+        token.setTokenType(tokenType);
+        token.setWallet(wallet);
+        token.setAmount(BigDecimal.ZERO);
+        return tokenRepository.save(token);
+    }
+    private Token getOrCreateToken(String tokenType, Wallet wallet) {
+        return tokenRepository.findTokenByTokenTypeAndWallet(tokenType, wallet)
+                .orElseGet(() -> createNewToken(tokenType, wallet));
     }
 
 
