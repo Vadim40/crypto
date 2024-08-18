@@ -3,7 +3,7 @@ package com.example.wallet.Services.Interfaces;
 import com.example.wallet.Models.Wallet;
 
 public interface WalletService {
-    Wallet saveWallet(Wallet wallet);
+    Wallet createWallet(Long accountId);
 
     Wallet updateWallet(Wallet wallet, Long id);
 
