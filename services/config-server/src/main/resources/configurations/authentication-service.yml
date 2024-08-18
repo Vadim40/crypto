@@ -1,4 +1,5 @@
 spring:
+
   datasource:
     url: jdbc:postgresql://localhost:5433/authentication_service
     username: user
@@ -8,14 +9,14 @@ spring:
       ddl-auto: create
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+
   kafka:
     producer:
       bootstrap-servers: localhost:9092
-      key-serializer: org.apache.kafka.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.serializer.JsonSerializer
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
-        spring.json.type.mapping: authenticationConfirmation:com.example.authenticationservice.Models.DTOs.AuthenticationConfirmation
-
+        spring.json.type.mapping: authenticationConfirmation:com.example.authenticationservice.Models.DTOs.AccountCreationConfirmation
 
 server:
   port: 8090

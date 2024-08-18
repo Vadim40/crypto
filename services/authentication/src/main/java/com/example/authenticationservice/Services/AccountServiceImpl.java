@@ -2,8 +2,9 @@ package com.example.authenticationservice.Services;
 
 import com.example.authenticationservice.Exceptions.AccountNotFoundException;
 import com.example.authenticationservice.Exceptions.PasswordNotMatchException;
+import com.example.authenticationservice.Kafka.AuthenticationProducer;
 import com.example.authenticationservice.Models.Account;
-import com.example.authenticationservice.Models.DTOs.AccountCreationConfirmation;
+import com.example.authenticationservice.Kafka.DTOs.AccountCreationConfirmation;
 import com.example.authenticationservice.Models.Enums.Role;
 import com.example.authenticationservice.Repositories.AccountRepository;
 import com.example.authenticationservice.Services.Interfaces.AccountService;
@@ -34,8 +35,9 @@ public class AccountServiceImpl implements AccountService {
     public Account saveAccount(Account account) {
         account.setRoles(new ArrayList<>(List.of(Role.ROLE_USER)));
         account.setPassword(passwordEncoder.encode(account.getPassword()));
-        sendAccountCreationConfirmation(account);
-        return accountRepository.save(account);
+        Account savedAccount= accountRepository.save(account);
+        sendAccountCreationConfirmation(savedAccount);
+        return  savedAccount;
     }
 
     private void sendAccountCreationConfirmation(Account account) {

@@ -1,6 +1,6 @@
-package com.example.authenticationservice.Services;
+package com.example.authenticationservice.Kafka;
 
-import com.example.authenticationservice.Models.DTOs.AccountCreationConfirmation;
+import com.example.authenticationservice.Kafka.DTOs.AccountCreationConfirmation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;

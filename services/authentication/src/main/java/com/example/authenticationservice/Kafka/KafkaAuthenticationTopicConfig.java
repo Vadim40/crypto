@@ -1,4 +1,4 @@
-package com.example.authenticationservice.Configurations;
+package com.example.authenticationservice.Kafka;
 
 import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.context.annotation.Bean;
