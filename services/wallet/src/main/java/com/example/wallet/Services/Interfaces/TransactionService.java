@@ -16,7 +16,7 @@ public interface TransactionService {
 
     Transaction findTransactionById(Long id);
 
-    void transferTokens(String addressDestination, String tokenType, BigDecimal amount);
+    void transferTokens(String addressDestination, String symbol, BigDecimal amount);
 
     List<Transaction> findTransactionsByType(TransactionType transactionType);
 
@@ -24,9 +24,9 @@ public interface TransactionService {
 
     List<Transaction> findAllTransactions();
 
-    void depositTokens(String tokenType, BigDecimal amount);
+    void depositTokens(String symbol, BigDecimal amount);
 
-    void withdrawTokens(String tokenType, BigDecimal amount);
+    void withdrawTokens(String symbol, BigDecimal amount);
 
-    void receiveTokens(String sourceAddress, String tokenType, BigDecimal amount);
+    void receiveTokens(String sourceAddress, String symbol, BigDecimal amount);
 }

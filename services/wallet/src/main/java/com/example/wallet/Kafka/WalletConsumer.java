@@ -1,5 +1,6 @@
-package com.example.wallet.Kafka.DTOs;
+package com.example.wallet.Kafka;
 
+import com.example.wallet.Kafka.DTOs.AccountCreationConfirmation;
 import com.example.wallet.Services.Interfaces.WalletService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

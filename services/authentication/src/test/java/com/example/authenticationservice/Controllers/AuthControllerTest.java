@@ -1,5 +1,6 @@
 package com.example.authenticationservice.Controllers;
 
+import com.example.authenticationservice.Kafka.AuthenticationProducer;
 import com.example.authenticationservice.Models.Account;
 import com.example.authenticationservice.Models.CustomUserDetails;
 import com.example.authenticationservice.Models.DTOs.JwtRequest;
@@ -24,6 +25,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
@@ -87,7 +89,6 @@ class AuthControllerTest {
         JwtRequest jwtRequest = new JwtRequest(email, password);
 
         String jsonRequest = objectMapper.writeValueAsString(jwtRequest);
-
 
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post("/api/auth")
                         .content(jsonRequest)

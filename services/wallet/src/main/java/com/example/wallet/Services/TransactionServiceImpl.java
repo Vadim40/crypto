@@ -72,76 +72,76 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     @Transactional
-    public void transferTokens(String destinationAddress, String tokenType, BigDecimal amount) {
+    public void transferTokens(String destinationAddress, String symbol, BigDecimal amount) {
         AccountResponse accountResponse = accountService.getCurrentAccount();
-        processTokenTransfer(accountResponse, destinationAddress, tokenType, amount);
+        processTokenTransfer(accountResponse, destinationAddress, symbol, amount);
     }
 
 
     @Transactional
     @Override
-    public void depositTokens(String tokenType, BigDecimal amount) {
+    public void depositTokens(String symbol, BigDecimal amount) {
         AccountResponse accountResponse = accountService.getCurrentAccount();
-        processTokenDeposit(accountResponse, tokenType, amount);
+        processTokenDeposit(accountResponse, symbol, amount);
     }
 
 
     @Transactional
     @Override
-    public void withdrawTokens(String tokenType, BigDecimal amount) {
+    public void withdrawTokens(String symbol, BigDecimal amount) {
         AccountResponse accountResponse = accountService.getCurrentAccount();
-        processTokenWithdrawal(accountResponse, tokenType, amount);
+        processTokenWithdrawal(accountResponse, symbol, amount);
     }
 
 
     @Transactional
     @Override
-    public void receiveTokens(String sourceAddress, String tokenType, BigDecimal amount) {
+    public void receiveTokens(String sourceAddress, String symbol, BigDecimal amount) {
         AccountResponse accountResponse = accountService.getCurrentAccount();
-        processTokenReceive(accountResponse,sourceAddress, tokenType, amount );
+        processTokenReceive(accountResponse,sourceAddress, symbol, amount );
     }
 
-    private void processTokenTransfer(AccountResponse accountResponse, String destinationAddress, String tokenType, BigDecimal amount) {
+    private void processTokenTransfer(AccountResponse accountResponse, String destinationAddress, String symbol, BigDecimal amount) {
         Wallet sourceWallet = walletService.findWalletByAccountId(accountResponse.id());
         Wallet destinationWallet = walletService.findWalletByAddress(destinationAddress);
 
-        tokenService.transferTokens(tokenType, amount, sourceWallet, destinationWallet);
+        tokenService.transferTokens(symbol, amount, sourceWallet, destinationWallet);
 
-        createAndSaveTransaction(accountResponse.id(), sourceWallet, destinationWallet, tokenType, amount, TransactionType.TRANSFER);
+        createAndSaveTransaction(accountResponse.id(), sourceWallet, destinationWallet, symbol, amount, TransactionType.TRANSFER);
     }
 
-    private void processTokenDeposit(AccountResponse accountResponse, String tokenType, BigDecimal amount) {
+    private void processTokenDeposit(AccountResponse accountResponse, String symbol, BigDecimal amount) {
         Wallet wallet = walletService.findWalletByAccountId(accountResponse.id());
 
-        tokenService.addTokens(tokenType, amount, wallet);
+        tokenService.addTokens(symbol, amount, wallet);
 
-        createAndSaveTransaction(accountResponse.id(), null, wallet, tokenType, amount, TransactionType.DEPOSIT);
+        createAndSaveTransaction(accountResponse.id(), null, wallet, symbol, amount, TransactionType.DEPOSIT);
     }
 
-    private void processTokenWithdrawal(AccountResponse accountResponse, String tokenType, BigDecimal amount) {
+    private void processTokenWithdrawal(AccountResponse accountResponse, String symbol, BigDecimal amount) {
         Wallet wallet = walletService.findWalletByAccountId(accountResponse.id());
 
-        tokenService.subtractTokens(tokenType, amount, wallet);
+        tokenService.subtractTokens(symbol, amount, wallet);
 
-        createAndSaveTransaction(accountResponse.id(), wallet, null, tokenType, amount, TransactionType.WITHDRAWAL);
+        createAndSaveTransaction(accountResponse.id(), wallet, null, symbol, amount, TransactionType.WITHDRAWAL);
     }
 
-    private void processTokenReceive(AccountResponse accountResponse, String sourceAddress, String tokenType, BigDecimal amount) {
+    private void processTokenReceive(AccountResponse accountResponse, String sourceAddress, String symbol, BigDecimal amount) {
         Wallet sourceWallet = walletService.findWalletByAddress(sourceAddress);
         Wallet destinationWallet = walletService.findWalletByAccountId(accountResponse.id());
 
-        tokenService.transferTokens(tokenType, amount, sourceWallet, destinationWallet);
+        tokenService.transferTokens(symbol, amount, sourceWallet, destinationWallet);
 
-        createAndSaveTransaction(accountResponse.id(), sourceWallet, destinationWallet, tokenType, amount, TransactionType.RECEIVE);
+        createAndSaveTransaction(accountResponse.id(), sourceWallet, destinationWallet, symbol, amount, TransactionType.RECEIVE);
     }
 
 
-    private void createAndSaveTransaction(Long accountId, Wallet sourceWallet, Wallet destinationWallet, String tokenType, BigDecimal amount, TransactionType transactionType) {
+    private void createAndSaveTransaction(Long accountId, Wallet sourceWallet, Wallet destinationWallet, String symbol, BigDecimal amount, TransactionType transactionType) {
         Transaction transaction = new Transaction();
         transaction.setAccountId(accountId);
         transaction.setSourceWallet(sourceWallet);
         transaction.setDestinationWallet(destinationWallet);
-        transaction.setTokenType(tokenType);
+        transaction.setTokenType(symbol);
         transaction.setAmount(amount);
         transaction.setTransactionDate(LocalDate.now());
         transaction.setTransactionType(transactionType);

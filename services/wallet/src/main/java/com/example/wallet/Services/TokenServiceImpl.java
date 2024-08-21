@@ -29,35 +29,35 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public Token findTokenByTokenTypeAndWallet(String tokenType, Wallet wallet) {
-        return tokenRepository.findTokenByTokenTypeAndWallet(tokenType, wallet)
-                .orElseThrow(() -> new TokenNotFoundException("Token not found: "+tokenType));
+    public Token findTokenBySymbolAndWallet(String symbol, Wallet wallet) {
+        return tokenRepository.findTokenByTokenTypeAndWallet(symbol, wallet)
+                .orElseThrow(() -> new TokenNotFoundException("Token not found: "+symbol));
     }
 
     @Override
     @Transactional
-    public void transferTokens(String tokenType, BigDecimal amount, Wallet sourceWallet, Wallet destinationWallet) {
-        addTokens(tokenType,amount, destinationWallet);
-        subtractTokens(tokenType, amount, sourceWallet);
+    public void transferTokens(String symbol, BigDecimal amount, Wallet sourceWallet, Wallet destinationWallet) {
+        addTokens(symbol,amount, destinationWallet);
+        subtractTokens(symbol, amount, sourceWallet);
 
     }
 
     @Override
-    public void addTokens(String tokenType, BigDecimal amount, Wallet wallet) {
-        Token token = getOrCreateToken(tokenType, wallet);
+    public void addTokens(String symbol, BigDecimal amount, Wallet wallet) {
+        Token token = getOrCreateToken(symbol, wallet);
         BigDecimal balance = token.getAmount().add(amount);
         token.setAmount(balance);
        tokenRepository.save(token);
     }
 
     @Override
-    public void subtractTokens(String tokenType, BigDecimal amount, Wallet wallet) {
-        Token token=findTokenByTokenTypeAndWallet(tokenType, wallet);
+    public void subtractTokens(String symbol, BigDecimal amount, Wallet wallet) {
+        Token token= findTokenBySymbolAndWallet(symbol, wallet);
         BigDecimal balance = token.getAmount().subtract(amount);
         if (balance.compareTo(BigDecimal.ZERO) < 0) {
             throw new NotEnoughTokenAmountException(String.format(
                     "Insufficient amount of token '%s' . Current balance: %s",
-                    tokenType,
+                    symbol,
                     token.getAmount()
 
             ));
@@ -73,16 +73,16 @@ public class TokenServiceImpl implements TokenService {
         tokenRepository.save(token);
     }
 
-    private Token createNewToken(String tokenType, Wallet wallet) {
+    private Token createNewToken(String symbol, Wallet wallet) {
         Token token = new Token();
-        token.setTokenType(tokenType);
+        token.setSymbol(symbol);
         token.setWallet(wallet);
         token.setAmount(BigDecimal.ZERO);
         return tokenRepository.save(token);
     }
-    private Token getOrCreateToken(String tokenType, Wallet wallet) {
-        return tokenRepository.findTokenByTokenTypeAndWallet(tokenType, wallet)
-                .orElseGet(() -> createNewToken(tokenType, wallet));
+    private Token getOrCreateToken(String symbol, Wallet wallet) {
+        return tokenRepository.findTokenByTokenTypeAndWallet(symbol, wallet)
+                .orElseGet(() -> createNewToken(symbol, wallet));
     }
 
 

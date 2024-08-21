@@ -1,0 +1,10 @@
+
+spring:
+  config:
+    import: optional:configserver:http://localhost:8888
+  application:
+    name: exchange-service
+
+coinmarketcap:
+  api:
+    key: e087e44e-36a5-482f-a8f2-da057fca5e1c

@@ -1,4 +1,4 @@
-package com.example.authenticationservice.Models.DTOs;
+package com.example.wallet.DTOs;
 
 public record JwtRequest(
         String password,

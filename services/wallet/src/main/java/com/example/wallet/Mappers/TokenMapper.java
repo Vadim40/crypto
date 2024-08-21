@@ -11,7 +11,7 @@ public class TokenMapper {
     public TokenDTO mapTokenToTokenDTO(Token token) {
         return new TokenDTO(
                 token.getId(),
-                token.getTokenType(),
+                token.getSymbol(),
                 token.getAmount()
         );
     }

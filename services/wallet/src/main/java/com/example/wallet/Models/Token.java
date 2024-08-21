@@ -24,8 +24,8 @@ public class Token {
     @JoinColumn(name = "wallet_id", nullable = false)
     private Wallet wallet;
 
-    @Column(name = "token_type", nullable = false)
-    private String tokenType;
+    @Column(name = "symbol", nullable = false)
+    private String symbol;
 
     @Column(name = "amount", nullable = false)
     private BigDecimal amount;

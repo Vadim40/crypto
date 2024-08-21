@@ -11,7 +11,7 @@ public interface TokenService {
     void deleteToken(Long id);
 
     Token findTokenById(Long id);
-    Token findTokenByTokenTypeAndWallet(String type, Wallet wallet);
+    Token findTokenBySymbolAndWallet(String type, Wallet wallet);
     void transferTokens(String type, BigDecimal amount, Wallet sourceWallet , Wallet destinationWallet);
 
     void addTokens(String tokenType, BigDecimal amount, Wallet wallet);
