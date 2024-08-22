@@ -9,6 +9,6 @@ import java.util.Optional;
 
 @Repository
 public interface TokenRepository extends JpaRepository<Token, Long> {
-    Optional<Token> findTokenByTokenTypeAndWallet(String type, Wallet wallet);
+    Optional<Token> findTokenBySymbolAndWallet(String symbol, Wallet wallet);
 
 }

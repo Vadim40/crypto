@@ -30,7 +30,7 @@ public class TokenServiceImpl implements TokenService {
 
     @Override
     public Token findTokenBySymbolAndWallet(String symbol, Wallet wallet) {
-        return tokenRepository.findTokenByTokenTypeAndWallet(symbol, wallet)
+        return tokenRepository.findTokenBySymbolAndWallet(symbol, wallet)
                 .orElseThrow(() -> new TokenNotFoundException("Token not found: "+symbol));
     }
 
@@ -81,7 +81,7 @@ public class TokenServiceImpl implements TokenService {
         return tokenRepository.save(token);
     }
     private Token getOrCreateToken(String symbol, Wallet wallet) {
-        return tokenRepository.findTokenByTokenTypeAndWallet(symbol, wallet)
+        return tokenRepository.findTokenBySymbolAndWallet(symbol, wallet)
                 .orElseGet(() -> createNewToken(symbol, wallet));
     }
 
