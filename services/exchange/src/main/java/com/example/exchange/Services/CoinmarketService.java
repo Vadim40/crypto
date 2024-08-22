@@ -2,13 +2,10 @@ package com.example.exchange.Services;
 
 import com.example.exchange.Models.DTOs.CryptoRateResponse;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.core.ParameterizedTypeReference;
 
 import java.util.List;
 
@@ -18,11 +15,14 @@ public class CoinmarketService {
     @Value("${coinmarketcap.api.key}")
     private String apiKey;
 
-    private final RestTemplate restTemplate =new RestTemplate();
+    private final RestTemplate restTemplate=new RestTemplate();
 
 
-    public List<CryptoRateResponse> getCryptoRatesInUSDT() {
-        String url = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?convert=USDT";
+    public List<CryptoRateResponse> getCryptoRates(String targetCurrency) {
+        String url = String.format(
+                "https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?convert=%s",
+                targetCurrency
+        );
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-CMC_PRO_API_KEY", apiKey);

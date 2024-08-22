@@ -20,8 +20,4 @@ public class CryptoRateResponse {
         @JsonProperty("price")
         private BigDecimal price;
     }
-
-    public BigDecimal getPriceInUSDT() {
-        return quote.get("USDT").getPrice();
-    }
 }

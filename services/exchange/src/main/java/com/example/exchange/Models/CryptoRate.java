@@ -14,7 +14,10 @@ public class CryptoRate {
     private Long id;
 
     @Column(nullable = false)
-    private String symbol;
+    private String baseCurrency;
+
+    @Column(nullable = false)
+    private String targetCurrency;
 
     @Column(nullable = false)
     private BigDecimal rate;
