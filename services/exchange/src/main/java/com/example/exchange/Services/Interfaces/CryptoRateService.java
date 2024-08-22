@@ -7,6 +7,6 @@ import java.math.BigDecimal;
 public interface CryptoRateService {
     CryptoRate findExchangeRate(String baseCurrency, String targetCurrency);
     CryptoRate saveCryptoRate(CryptoRate rate);
-    BigDecimal convertCurrency(String baseCurrency, String targetCurrency, BigDecimal amount);
+    void executeCurrencyConversion(String baseCurrency, String targetCurrency, BigDecimal amount);
 
 }

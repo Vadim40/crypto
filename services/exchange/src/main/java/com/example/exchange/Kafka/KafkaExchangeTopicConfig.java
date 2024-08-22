@@ -6,9 +6,9 @@ import org.springframework.kafka.config.TopicBuilder;
 
 public class KafkaExchangeTopicConfig {
     @Bean
-    public NewTopic authenticationTopic(){
+    public NewTopic exchangeTopic(){
         return TopicBuilder
-                .name("authentication-topic")
+                .name("exchange-topic")
                 .build();
 
     }

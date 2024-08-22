@@ -3,13 +3,14 @@ package com.example.exchange.Mappers;
 import com.example.exchange.Models.CryptoRate;
 import com.example.exchange.Models.DTOs.CryptoRateDTO;
 import com.example.exchange.Models.DTOs.CryptoRateResponse;
+import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
+@Component
 public class CryptoRateMapper {
 
     public List<CryptoRate> mapCryptoRateResponseToCryptoRates(CryptoRateResponse cryptoRateResponse) {

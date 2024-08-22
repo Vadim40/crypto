@@ -4,12 +4,15 @@ import com.example.exchange.Exceptions.CryptoRateNotFoundException;
 import com.example.exchange.Kafka.DTOs.ExchangeConfirmation;
 import com.example.exchange.Kafka.ExchangeProducer;
 import com.example.exchange.Models.CryptoRate;
+import com.example.exchange.Models.DTOs.AccountResponse;
 import com.example.exchange.Repositories.CryptoRateRepository;
+import com.example.exchange.Services.Interfaces.AccountService;
 import com.example.exchange.Services.Interfaces.CryptoRateService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
@@ -17,6 +20,7 @@ import java.math.BigDecimal;
 public class CryptoRateServiceImpl implements CryptoRateService {
     private final CryptoRateRepository cryptoRateRepository;
     private final ExchangeProducer exchangeProducer;
+    private final AccountService accountService;
 
     @Override
     public CryptoRate findExchangeRate(String baseCurrency, String targetCurrency) {
@@ -31,14 +35,25 @@ public class CryptoRateServiceImpl implements CryptoRateService {
     }
 
     @Override
-    public BigDecimal convertCurrency(String baseCurrency, String targetCurrency, BigDecimal amount) {
+    public void executeCurrencyConversion(String baseCurrency, String targetCurrency, BigDecimal amount) {
+        AccountResponse accountResponse = accountService.getCurrentAccount();
+        ExchangeConfirmation exchangeConfirmation = createExchangeConfirmation(
+                baseCurrency, targetCurrency, amount, accountResponse);
+        exchangeProducer.sendExchangeConfirmation(exchangeConfirmation);
+    }
+
+    private ExchangeConfirmation createExchangeConfirmation(String baseCurrency, String targetCurrency, BigDecimal amount, AccountResponse accountResponse) {
         CryptoRate cryptoRate = findExchangeRate(baseCurrency, targetCurrency);
         BigDecimal rate = cryptoRate.getRate();
-        BigDecimal convertedAmount = amount.multiply(rate);
-
-        ExchangeConfirmation exchangeConfirmation = new ExchangeConfirmation(baseCurrency, targetCurrency, convertedAmount);
-        exchangeProducer.sendExchangeConfirmation(exchangeConfirmation);
-
-        return convertedAmount;
+        BigDecimal amountTo = amount.multiply(rate);
+        LocalDate localDate = LocalDate.now();
+        return new ExchangeConfirmation(
+                accountResponse.id(),
+                baseCurrency,
+                targetCurrency,
+                amount,
+                amountTo,
+                localDate
+        );
     }
 }

@@ -16,14 +16,18 @@ public class ExchangeProducer {
     private final KafkaTemplate<String, ExchangeConfirmation> kafkaTemplate;
 
     public void sendExchangeConfirmation(ExchangeConfirmation exchangeConfirmation) {
-        log.info("Sending exchange confirmation for {} to {} with amount: {}",
+        log.info("Sending exchange confirmation for Account ID: {}, converting {} {} to {} {} on {}",
+                exchangeConfirmation.accountId(),
+                exchangeConfirmation.amountFrom(),
                 exchangeConfirmation.symbolFrom(),
+                exchangeConfirmation.amountTo(),
                 exchangeConfirmation.symbolTo(),
-                exchangeConfirmation.amount());
-        Message<ExchangeConfirmation> message= MessageBuilder
+                exchangeConfirmation.timestamp());
+        Message<ExchangeConfirmation> message = MessageBuilder
                 .withPayload(exchangeConfirmation)
-                .setHeader(KafkaHeaders.TOPIC,"exchange-topic")
+                .setHeader(KafkaHeaders.TOPIC, "exchange-topic")
                 .build();
         kafkaTemplate.send(message);
     }
+
 }

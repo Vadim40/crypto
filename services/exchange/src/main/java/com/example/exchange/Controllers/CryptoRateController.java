@@ -6,6 +6,7 @@ import com.example.exchange.Models.DTOs.ConvertRequest;
 import com.example.exchange.Models.DTOs.CryptoRateDTO;
 import com.example.exchange.Models.DTOs.ExchangeRequest;
 import com.example.exchange.Services.Interfaces.CryptoRateService;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -29,7 +30,7 @@ public class CryptoRateController {
     }
     @GetMapping("/convert")
     ResponseEntity<Object> convertCurrencies(@Valid @RequestBody ConvertRequest request){
-        cryptoRateService.convertCurrency(request.baseCurrency(),request.targetCurrency(), request.amount());
+        cryptoRateService.executeCurrencyConversion(request.baseCurrency(),request.targetCurrency(), request.amount());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }
