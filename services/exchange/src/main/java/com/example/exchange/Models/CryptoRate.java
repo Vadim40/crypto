@@ -19,6 +19,7 @@ public class CryptoRate {
     @Column(nullable = false)
     private String targetCurrency;
 
-    @Column(nullable = false)
+    @Column(nullable = false, precision = 20, scale = 8)
     private BigDecimal rate;
+
 }

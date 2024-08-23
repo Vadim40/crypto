@@ -1,6 +1,7 @@
 package com.example.exchange.Models.DTOs;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -16,6 +17,7 @@ public class CryptoRateResponse {
     private Map<String, CurrencyQuote> quote;
 
     @Data
+    @AllArgsConstructor
     public static class CurrencyQuote {
         @JsonProperty("price")
         private BigDecimal price;

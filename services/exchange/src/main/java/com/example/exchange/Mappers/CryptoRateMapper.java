@@ -3,10 +3,11 @@ package com.example.exchange.Mappers;
 import com.example.exchange.Models.CryptoRate;
 import com.example.exchange.Models.DTOs.CryptoRateDTO;
 import com.example.exchange.Models.DTOs.CryptoRateResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -29,7 +30,7 @@ public class CryptoRateMapper {
                     CryptoRate inverseRate = new CryptoRate();
                     inverseRate.setBaseCurrency(targetCurrency);
                     inverseRate.setTargetCurrency(baseCurrency);
-                    inverseRate.setRate(BigDecimal.ONE.divide(rate, MathContext.DECIMAL128));
+                    inverseRate.setRate(BigDecimal.ONE.divide(rate, 16, RoundingMode.HALF_UP));
 
                     return Stream.of(directRate, inverseRate);
                 })

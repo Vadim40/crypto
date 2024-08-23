@@ -24,7 +24,7 @@ public class CryptoRateController {
     private final CryptoRateMapper cryptoRateMapper;
     @GetMapping("/exchange")
     ResponseEntity<CryptoRateDTO> findExchangeRate(@Valid @RequestBody ExchangeRequest request){
-        CryptoRate cryptoRate=cryptoRateService.findExchangeRate(request.baseCurrency(), request.targetCurrency());
+        CryptoRate cryptoRate=cryptoRateService.findCryptoRate(request.baseCurrency(), request.targetCurrency());
         CryptoRateDTO cryptoRateDTO=cryptoRateMapper.mapCryptoRateToCryptoRateDTO(cryptoRate);
         return new ResponseEntity<>(cryptoRateDTO, HttpStatus.OK);
     }

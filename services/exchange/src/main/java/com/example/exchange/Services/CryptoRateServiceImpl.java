@@ -23,7 +23,7 @@ public class CryptoRateServiceImpl implements CryptoRateService {
     private final AccountService accountService;
 
     @Override
-    public CryptoRate findExchangeRate(String baseCurrency, String targetCurrency) {
+    public CryptoRate findCryptoRate(String baseCurrency, String targetCurrency) {
         return cryptoRateRepository.findCryptoRateByBaseCurrencyAndTargetCurrency(baseCurrency, targetCurrency)
                 .orElseThrow(() -> new CryptoRateNotFoundException(
                         "Crypto rate for: " + baseCurrency + "/" + targetCurrency + " not found"));
@@ -42,8 +42,16 @@ public class CryptoRateServiceImpl implements CryptoRateService {
         exchangeProducer.sendExchangeConfirmation(exchangeConfirmation);
     }
 
+    @Override
+    public void updateCryptoRate(CryptoRate rate) {
+        CryptoRate savedRate= cryptoRateRepository.findCryptoRateByBaseCurrencyAndTargetCurrency(
+                rate.getBaseCurrency(), rate.getTargetCurrency()).orElse(rate);
+        savedRate.setRate(rate.getRate());
+        cryptoRateRepository.save(savedRate);
+    }
+
     private ExchangeConfirmation createExchangeConfirmation(String baseCurrency, String targetCurrency, BigDecimal amount, AccountResponse accountResponse) {
-        CryptoRate cryptoRate = findExchangeRate(baseCurrency, targetCurrency);
+        CryptoRate cryptoRate = findCryptoRate(baseCurrency, targetCurrency);
         BigDecimal rate = cryptoRate.getRate();
         BigDecimal amountTo = amount.multiply(rate);
         LocalDate localDate = LocalDate.now();

@@ -2,12 +2,15 @@ package com.example.exchange.Services;
 
 import com.example.exchange.Models.DTOs.CryptoRateResponse;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.core.ParameterizedTypeReference;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class CoinmarketService {
@@ -15,8 +18,7 @@ public class CoinmarketService {
     @Value("${coinmarketcap.api.key}")
     private String apiKey;
 
-    private final RestTemplate restTemplate=new RestTemplate();
-
+    private final RestTemplate restTemplate = new RestTemplate();
 
     public List<CryptoRateResponse> getCryptoRates(String targetCurrency) {
         String url = String.format(
@@ -29,13 +31,32 @@ public class CoinmarketService {
 
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
-        ResponseEntity<List<CryptoRateResponse>> responseEntity = restTemplate.exchange(
+        ResponseEntity<Map<String, Object>> responseEntity = restTemplate.exchange(
                 url,
                 HttpMethod.GET,
                 entity,
-                new ParameterizedTypeReference<>() {}
+                new ParameterizedTypeReference<Map<String, Object>>() {}
         );
 
-        return responseEntity.getBody();
+
+        Map<String, Object> responseBody = responseEntity.getBody();
+        List<Map<String, Object>> data = (List<Map<String, Object>>) responseBody.get("data");
+
+        List<CryptoRateResponse> cryptoRates = new ArrayList<>();
+        for (Map<String, Object> item : data) {
+            String symbol = (String) item.get("symbol");
+
+            Map<String, Object> quote = (Map<String, Object>) item.get("quote");
+            Map<String, Object> targetCurrencyData = (Map<String, Object>) quote.get(targetCurrency);
+            BigDecimal price = new BigDecimal(targetCurrencyData.get("price").toString());
+
+            CryptoRateResponse rateResponse = new CryptoRateResponse();
+            rateResponse.setSymbol(symbol);
+            rateResponse.setQuote(Map.of(targetCurrency, new CryptoRateResponse.CurrencyQuote(price)));
+
+            cryptoRates.add(rateResponse);
+        }
+
+        return cryptoRates;
     }
 }

@@ -5,8 +5,9 @@ import com.example.exchange.Models.CryptoRate;
 import java.math.BigDecimal;
 
 public interface CryptoRateService {
-    CryptoRate findExchangeRate(String baseCurrency, String targetCurrency);
+    CryptoRate findCryptoRate(String baseCurrency, String targetCurrency);
     CryptoRate saveCryptoRate(CryptoRate rate);
     void executeCurrencyConversion(String baseCurrency, String targetCurrency, BigDecimal amount);
 
+    void updateCryptoRate(CryptoRate rate);
 }
