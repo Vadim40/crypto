@@ -1,18 +1,17 @@
 package com.example.wallet.Services;
 
 import com.example.wallet.Exceptions.TransactionNotFoundException;
+import com.example.wallet.Models.*;
 import com.example.wallet.Models.DTO.AccountResponse;
 import com.example.wallet.Models.Enum.TransactionType;
-import com.example.wallet.Models.Transaction;
-import com.example.wallet.Models.Wallet;
-import com.example.wallet.Repositories.TransactionRepository;
+import com.example.wallet.Repositories.*;
 import com.example.wallet.Services.Interfaces.AccountService;
 import com.example.wallet.Services.Interfaces.TokenService;
 import com.example.wallet.Services.Interfaces.TransactionService;
 import com.example.wallet.Services.Interfaces.WalletService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -21,62 +20,42 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class TransactionServiceImpl implements TransactionService {
+
     private final TokenService tokenService;
-    private final TransactionRepository transactionRepository;
     private final WalletService walletService;
     private final AccountService accountService;
 
-    @Override
-    public Transaction saveTransaction(Transaction transaction) {
-        return transactionRepository.save(transaction);
-    }
+    private final TransactionRepository transactionRepository;
 
-    @Override
-    public Transaction updateTransaction(Transaction transaction, Long id) {
-        transaction.setId(id);
-        return transactionRepository.save(transaction);
-    }
-
-    @Override
-    public void deleteTransaction(Long id) {
-        transactionRepository.deleteById(id);
-    }
 
     @Override
     public Transaction findTransactionById(Long id) {
         return transactionRepository.findById(id)
-                .orElseThrow(() -> new TransactionNotFoundException("Transaction not found by this id: "+id));
+                .orElseThrow(() -> new TransactionNotFoundException("Transaction not found by id: " + id));
     }
 
-
     @Override
-    public List<Transaction> findTransactionsByType(TransactionType transactionType) {
+    public List<Transaction> findAccountTransactionsByTransactionType(TransactionType transactionType) {
         Long accountId = accountService.getCurrentAccount().id();
         return transactionRepository.findTransactionsByTransactionTypeAndAccountId(transactionType, accountId)
                 .orElseThrow(() -> new TransactionNotFoundException("Transactions not found for type: " + transactionType));
     }
-
     @Override
-    public List<Transaction> findTransactionsAfterDate(LocalDate localDate) {
+    public List<Transaction> findAccountTransactionsByTransactionTypeAfterDate(TransactionType transactionType, LocalDate date) {
         Long accountId = accountService.getCurrentAccount().id();
-        return transactionRepository.findTransactionsByTransactionDateAfterAndAccountId(localDate, accountId)
-                .orElseThrow(() -> new TransactionNotFoundException("Transactions not found after: " + localDate));
+
+        return transactionRepository.findTransactionsByTransactionTypeAndTransactionDateAfterAndAccountId(transactionType, date, accountId)
+                .orElseThrow(() -> new TransactionNotFoundException("Transactions not found for type: " + transactionType + ", after date: " + date ));
     }
 
-    @Override
-    public List<Transaction> findAllTransactions() {
-        Long accountId = accountService.getCurrentAccount().id();
-        return transactionRepository.findTransactionsByAccountId(accountId)
-                .orElseThrow(() -> new TransactionNotFoundException("Transactions not found"));
-    }
 
-    @Override
+
     @Transactional
+    @Override
     public void transferTokens(String destinationAddress, String symbol, BigDecimal amount) {
         AccountResponse accountResponse = accountService.getCurrentAccount();
         processTokenTransfer(accountResponse, destinationAddress, symbol, amount);
     }
-
 
     @Transactional
     @Override
@@ -85,7 +64,6 @@ public class TransactionServiceImpl implements TransactionService {
         processTokenDeposit(accountResponse, symbol, amount);
     }
 
-
     @Transactional
     @Override
     public void withdrawTokens(String symbol, BigDecimal amount) {
@@ -93,12 +71,11 @@ public class TransactionServiceImpl implements TransactionService {
         processTokenWithdrawal(accountResponse, symbol, amount);
     }
 
-
     @Transactional
     @Override
     public void receiveTokens(String sourceAddress, String symbol, BigDecimal amount) {
         AccountResponse accountResponse = accountService.getCurrentAccount();
-        processTokenReceive(accountResponse,sourceAddress, symbol, amount );
+        processTokenReceive(accountResponse, sourceAddress, symbol, amount);
     }
 
     private void processTokenTransfer(AccountResponse accountResponse, String destinationAddress, String symbol, BigDecimal amount) {
@@ -107,7 +84,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         tokenService.transferTokens(symbol, amount, sourceWallet, destinationWallet);
 
-        createAndSaveTransaction(accountResponse.id(), sourceWallet, destinationWallet, symbol, amount, TransactionType.TRANSFER);
+        createAndSaveTransferTransaction(accountResponse.id(), sourceWallet, destinationWallet, symbol, amount);
     }
 
     private void processTokenDeposit(AccountResponse accountResponse, String symbol, BigDecimal amount) {
@@ -115,7 +92,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         tokenService.addTokens(symbol, amount, wallet);
 
-        createAndSaveTransaction(accountResponse.id(), null, wallet, symbol, amount, TransactionType.DEPOSIT);
+        createAndSaveDepositTransaction(accountResponse.id(), wallet, symbol, amount);
     }
 
     private void processTokenWithdrawal(AccountResponse accountResponse, String symbol, BigDecimal amount) {
@@ -123,7 +100,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         tokenService.subtractTokens(symbol, amount, wallet);
 
-        createAndSaveTransaction(accountResponse.id(), wallet, null, symbol, amount, TransactionType.WITHDRAWAL);
+        createAndSaveWithdrawalTransaction(accountResponse.id(), wallet, symbol, amount);
     }
 
     private void processTokenReceive(AccountResponse accountResponse, String sourceAddress, String symbol, BigDecimal amount) {
@@ -132,20 +109,58 @@ public class TransactionServiceImpl implements TransactionService {
 
         tokenService.transferTokens(symbol, amount, sourceWallet, destinationWallet);
 
-        createAndSaveTransaction(accountResponse.id(), sourceWallet, destinationWallet, symbol, amount, TransactionType.RECEIVE);
+        createAndSaveReceiveTransaction(accountResponse.id(), sourceWallet, destinationWallet, symbol, amount);
     }
 
-
-    private void createAndSaveTransaction(Long accountId, Wallet sourceWallet, Wallet destinationWallet, String symbol, BigDecimal amount, TransactionType transactionType) {
-        Transaction transaction = new Transaction();
+    private void createAndSaveTransferTransaction(Long accountId, Wallet sourceWallet, Wallet destinationWallet, String symbol, BigDecimal amount) {
+        TransferTransaction transaction = new TransferTransaction();
         transaction.setAccountId(accountId);
         transaction.setSourceWallet(sourceWallet);
         transaction.setDestinationWallet(destinationWallet);
-        transaction.setTokenType(symbol);
+        transaction.setTokenSymbol(symbol);
         transaction.setAmount(amount);
         transaction.setTransactionDate(LocalDate.now());
-        transaction.setTransactionType(transactionType);
+        transaction.setTransactionType(TransactionType.TRANSFER);
+
         transactionRepository.save(transaction);
     }
+
+    private void createAndSaveDepositTransaction(Long accountId, Wallet wallet, String symbol, BigDecimal amount) {
+        DepositTransaction transaction = new DepositTransaction();
+        transaction.setAccountId(accountId);
+        transaction.setWallet(wallet);
+        transaction.setTokenSymbol(symbol);
+        transaction.setAmount(amount);
+        transaction.setTransactionDate(LocalDate.now());
+        transaction.setTransactionType(TransactionType.DEPOSIT);
+
+        transactionRepository.save(transaction);
+    }
+
+    private void createAndSaveWithdrawalTransaction(Long accountId, Wallet wallet, String symbol, BigDecimal amount) {
+        WithdrawalTransaction transaction = new WithdrawalTransaction();
+        transaction.setAccountId(accountId);
+        transaction.setWallet(wallet);
+        transaction.setTokenSymbol(symbol);
+        transaction.setAmount(amount);
+        transaction.setTransactionDate(LocalDate.now());
+        transaction.setTransactionType(TransactionType.WITHDRAWAL);
+
+        transactionRepository.save(transaction);
+    }
+
+    private void createAndSaveReceiveTransaction(Long accountId, Wallet sourceWallet, Wallet destinationWallet, String symbol, BigDecimal amount) {
+        ReceiveTransaction transaction = new ReceiveTransaction();
+        transaction.setAccountId(accountId);
+        transaction.setSourceWallet(sourceWallet);
+        transaction.setDestinationWallet(destinationWallet);
+        transaction.setTokenSymbol(symbol);
+        transaction.setAmount(amount);
+        transaction.setTransactionDate(LocalDate.now());
+        transaction.setTransactionType(TransactionType.RECEIVE);
+
+        transactionRepository.save(transaction);
+    }
+
 
 }

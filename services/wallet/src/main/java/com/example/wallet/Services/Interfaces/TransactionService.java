@@ -1,32 +1,22 @@
 package com.example.wallet.Services.Interfaces;
 
+import com.example.wallet.Exceptions.TransactionNotFoundException;
+import com.example.wallet.Models.*;
 import com.example.wallet.Models.Enum.TransactionType;
-import com.example.wallet.Models.Transaction;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
 public interface TransactionService {
-    Transaction saveTransaction(Transaction transaction);
 
-    Transaction updateTransaction(Transaction transaction, Long id);
-
-    void deleteTransaction(Long id);
 
     Transaction findTransactionById(Long id);
 
-    void transferTokens(String addressDestination, String symbol, BigDecimal amount);
-
-    List<Transaction> findTransactionsByType(TransactionType transactionType);
-
-    List<Transaction> findTransactionsAfterDate(LocalDate localDate);
-
-    List<Transaction> findAllTransactions();
-
+    List<Transaction> findAccountTransactionsByTransactionType(TransactionType transactionType);
+    List<Transaction> findAccountTransactionsByTransactionTypeAfterDate(TransactionType transactionType, LocalDate date);
+    void transferTokens(String destinationAddress, String symbol, BigDecimal amount);
     void depositTokens(String symbol, BigDecimal amount);
-
     void withdrawTokens(String symbol, BigDecimal amount);
-
     void receiveTokens(String sourceAddress, String symbol, BigDecimal amount);
 }

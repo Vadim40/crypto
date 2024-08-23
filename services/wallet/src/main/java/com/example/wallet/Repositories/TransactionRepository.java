@@ -13,7 +13,6 @@ import java.util.Optional;
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
    Optional<List<Transaction>> findTransactionsByTransactionTypeAndAccountId(TransactionType transactionType, Long accountID);
 
-   Optional<List<Transaction>> findTransactionsByTransactionDateAfterAndAccountId(LocalDate localDate, Long accountId);
+   Optional<List<Transaction>> findTransactionsByTransactionTypeAndTransactionDateAfterAndAccountId(TransactionType transactionType,LocalDate localDate, Long accountId);
 
-   Optional<List<Transaction>> findTransactionsByAccountId(Long accountId);
 }
