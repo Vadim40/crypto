@@ -13,12 +13,12 @@ spring:
   kafka:
     consumer:
       bootstrap-servers: localhost:9092
-      group-id: authGroup
+      group-id: authGroup, exchangeGroup
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: '*'
-        spring.json.type.mapping: authenticationConfirmation:com.example.wallet.Kafka.DTOs.AccountCreationConfirmation
+        spring.json.type.mapping: authenticationConfirmation:com.example.wallet.Kafka.DTOs.AccountCreationConfirmation, com.example.wallet.Kafka.DTOs.ExchangeConfirmation
       auto-offset-reset: earliest
 
 server:
