@@ -29,27 +29,12 @@ public class TransactionController {
         return new ResponseEntity<>(transactionDTO, HttpStatus.OK);
     }
 
-    @GetMapping("/all")
-    public ResponseEntity<List<TransactionDTO>> findAllTransactions() {
-        List<Transaction> transactions = transactionService.findAllTransactions();
-        List<TransactionDTO> transactionDTOs = transactions.stream()
-                .map(transactionMapper::mapTransactionToTransactionDTO)
-                .collect(Collectors.toList());
-        return new ResponseEntity<>(transactionDTOs, HttpStatus.OK);
-    }
 
-    @GetMapping("/type")
-    public ResponseEntity<List<TransactionDTO>> findTransactionsByType(@RequestParam TransactionType transactionType) {
-        List<Transaction> transactions = transactionService.findTransactionsByType(transactionType);
-        List<TransactionDTO> transactionDTOs = transactions.stream()
-                .map(transactionMapper::mapTransactionToTransactionDTO)
-                .collect(Collectors.toList());
-        return new ResponseEntity<>(transactionDTOs, HttpStatus.OK);
-    }
 
     @GetMapping("/date")
-    public ResponseEntity<List<TransactionDTO>> findTransactionsAfterDate(@RequestParam LocalDate date) {
-        List<Transaction> transactions = transactionService.findTransactionsAfterDate(date);
+    public ResponseEntity<List<TransactionDTO>> findTransactionsAfterDate(@RequestBody @Valid TransactionFilterRequest request) {
+        List<Transaction> transactions = transactionService
+                .findAccountTransactionsByTransactionTypeAfterDate(request.transactionType(),request.date());
         List<TransactionDTO> transactionDTOs = transactions.stream()
                 .map(transactionMapper::mapTransactionToTransactionDTO)
                 .collect(Collectors.toList());
