@@ -10,7 +10,7 @@ public record ReceiveRequest(
         @Pattern(regexp = "^0x[a-fA-F0-9]{40}$", message = "Invalid wallet address format")
         String sourceAddress,
         @Size(max = 6, message = "Token type should not exceed 10 characters")
-        String tokenType,
+        String tokenSymbol,
         @DecimalMin(value = "0.00000001", message = "Amount must be greater than zero")
         BigDecimal amount
 ) {

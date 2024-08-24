@@ -2,7 +2,6 @@ package com.example.wallet.Controllers;
 
 import com.example.wallet.Mappers.TransactionMapper;
 import com.example.wallet.Models.DTO.*;
-import com.example.wallet.Models.Enum.TransactionType;
 import com.example.wallet.Models.Transaction;
 import com.example.wallet.Services.Interfaces.TransactionService;
 import jakarta.validation.Valid;
@@ -11,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,22 +41,22 @@ public class TransactionController {
 
     @PostMapping("/transfer-tokens")
     public ResponseEntity<Object> transferTokens(@RequestBody @Valid TransferRequest request) {
-        transactionService.transferTokens(request.destinationAddress(), request.tokenType(), request.amount());
+        transactionService.transferTokens(request);
         return new ResponseEntity<>(HttpStatus.OK);
     }
     @PostMapping("/deposit-tokens")
     public ResponseEntity<Object> depositTokens(@RequestBody @Valid DepositRequest request) {
-        transactionService.depositTokens(request.tokenType(), request.amount());
+        transactionService.depositTokens(request);
         return new ResponseEntity<>(HttpStatus.OK);
     }
     @PostMapping("/withdrawal-tokens")
     public ResponseEntity<Object> withdrawalTokens(@RequestBody @Valid WithdrawalRequest request) {
-        transactionService.withdrawTokens(request.tokenType(), request.amount());
+        transactionService.withdrawTokens(request);
         return new ResponseEntity<>(HttpStatus.OK);
     }
     @PostMapping("/receive-tokens")
     public ResponseEntity<Object> receiveTokens(@RequestBody @Valid ReceiveRequest request) {
-        transactionService.receiveTokens(request.sourceAddress(), request.tokenType(), request.amount());
+        transactionService.receiveTokens(request);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }
