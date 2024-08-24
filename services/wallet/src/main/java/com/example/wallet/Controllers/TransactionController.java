@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,14 +30,18 @@ public class TransactionController {
 
 
 
-    @GetMapping("/date")
-    public ResponseEntity<List<TransactionDTO>> findTransactionsAfterDate(@RequestBody @Valid TransactionFilterRequest request) {
+    @GetMapping("/transactions")
+    public ResponseEntity<List<TransactionDTO>> findTransactionsByTypeAfterDate(@RequestBody @Valid TransactionFilterRequest request) {
+        LocalDate date=getDefaultDate(request.date());
         List<Transaction> transactions = transactionService
-                .findAccountTransactionsByTransactionTypeAfterDate(request.transactionType(),request.date());
+                .findAccountTransactionsByTransactionTypeAfterDate(request.transactionType(),date);
         List<TransactionDTO> transactionDTOs = transactions.stream()
                 .map(transactionMapper::mapTransactionToTransactionDTO)
                 .collect(Collectors.toList());
         return new ResponseEntity<>(transactionDTOs, HttpStatus.OK);
+    }
+    private LocalDate getDefaultDate(LocalDate date) {
+        return date != null ? date : LocalDate.now().minusMonths(1);
     }
 
     @PostMapping("/transfer-tokens")

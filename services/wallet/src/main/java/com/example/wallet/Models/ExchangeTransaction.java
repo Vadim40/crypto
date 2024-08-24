@@ -27,6 +27,6 @@ public class ExchangeTransaction extends Transaction {
     @Column(name = "amount_from", nullable = false, precision = 19, scale = 8)
     private BigDecimal amountFrom;
 
-    @Column(name = "amount_from", nullable = false, precision = 19, scale = 8)
+    @Column(name = "amount_to", nullable = false, precision = 19, scale = 8)
     private BigDecimal amountTo;
 }

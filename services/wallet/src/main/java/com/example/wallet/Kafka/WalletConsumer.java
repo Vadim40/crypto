@@ -23,7 +23,7 @@ public class WalletConsumer {
     }
     @KafkaListener(topics ="exchange-topic")
     public void consumeExchangeConfirmation(ExchangeConfirmation exchangeConfirmation){
-        log.info("Consuming the message from authentication-topic Topic: {}", exchangeConfirmation);
+        log.info("Consuming the message from exchange-topic Topic: {}", exchangeConfirmation);
         transactionService.exchangeTokens(exchangeConfirmation);
     }
 

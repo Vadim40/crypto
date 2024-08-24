@@ -53,7 +53,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
                     username,
-                    null,
+                    jwt,
                     jwtTokenUtils.getRoles(jwt).stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList())
             );
             SecurityContextHolder.getContext().setAuthentication(token);
@@ -65,7 +65,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             } else {
                 log.error("Final token cannot be used for OTP verification");
                 handleException(response, "Final token cannot be used for OTP verification", HttpStatus.FORBIDDEN);
-                return;
             }
         } else {
             if (isOtpToken) {
