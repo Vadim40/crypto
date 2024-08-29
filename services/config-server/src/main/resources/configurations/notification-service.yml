@@ -1,0 +1,21 @@
+spring:
+
+  kafka:
+    consumer:
+      bootstrap-servers: localhost:9092
+      group-id: notificationGroup
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: '*'
+        spring.json.type.mapping: |
+          accountCreationEvent:com.example.notification.Kafka.DTOs.AccountCreationEvent,
+          exchangeConfirmation:com.example.notification.Kafka.DTOs.ExchangeConfirmation,
+          transactionConfirmation:com.example.notification.Kafka.DTOs.TransactionConfirmation,
+          otpVerification:com.example.notification.Kafka.DTOs.OtpVerification
+      auto-offset-reset: earliest
+
+
+server:
+  port: 8050
+
