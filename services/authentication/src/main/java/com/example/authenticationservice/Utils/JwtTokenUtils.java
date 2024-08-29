@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 public class JwtTokenUtils {
     @Value("${jwt.secret}")
     private  String secret;
-    @Value("${jwt.lifetime}")
+    @Value("${jwt.lifetime.access}")
     private Duration jwtLifetime;
 
     public String generateToken(UserDetails userDetails) {

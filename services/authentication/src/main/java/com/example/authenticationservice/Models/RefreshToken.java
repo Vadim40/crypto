@@ -7,20 +7,19 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-@Data
 @Entity
-@Table
+@Table(name = "refresh_token")
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Otp {
+public class RefreshToken {
     @Id
     @OneToOne
     @MapsId
     @JoinColumn
     private Account account;
     @Column(nullable = false)
-    private String otp;
-
+    private String token;
     @Column(nullable = false)
-    private LocalDateTime expiryTime;
+    private LocalDateTime expiryDate;
 }

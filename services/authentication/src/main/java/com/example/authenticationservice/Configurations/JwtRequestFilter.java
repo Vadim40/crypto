@@ -53,7 +53,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
                     username,
-                    jwt,
+                    null,
                     jwtTokenUtils.getRoles(jwt).stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList())
             );
             SecurityContextHolder.getContext().setAuthentication(token);

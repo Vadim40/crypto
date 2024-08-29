@@ -9,7 +9,6 @@ public interface OtpService {
 
     Otp saveOtp(Otp otp);
 
-    Otp updateOtpById(Otp otp, Long id);
 
     void deleteOtp(Long id);
 

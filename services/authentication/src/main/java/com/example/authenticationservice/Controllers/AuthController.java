@@ -3,11 +3,15 @@ package com.example.authenticationservice.Controllers;
 import com.example.authenticationservice.Models.DTOs.JwtRequest;
 import com.example.authenticationservice.Models.DTOs.JwtResponse;
 import com.example.authenticationservice.Services.Interfaces.AuthenticationService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -35,17 +39,26 @@ public class AuthController {
         return new ResponseEntity<>(jwtResponse, HttpStatus.OK);
     }
 //    @PostMapping("/logout")
-//    public String logoutPage (HttpServletRequest request, HttpServletResponse response) {
-//        HttpSession session = request.getSession(false);
+//    public ResponseEntity<Object> logout(HttpServletRequest request, HttpServletResponse response) {
 //        SecurityContextHolder.clearContext();
+//
+//        HttpSession session = request.getSession(false);
 //        if (session != null) {
 //            session.invalidate();
 //        }
-//        for (Cookie cookie : request.getCookies()) {
-//            cookie.setMaxAge(0);
+//
+//        if (request.getCookies() != null) {
+//            for (Cookie cookie : request.getCookies()) {
+//                cookie.setMaxAge(0);
+//                cookie.setPath("/");
+//                response.addCookie(cookie);
+//            }
 //        }
 //
-//        return "logout";
+//        response.setHeader("Authorization", "");
+//
+//
+//        return new ResponseEntity<>( HttpStatus.OK);
 //    }
 
 

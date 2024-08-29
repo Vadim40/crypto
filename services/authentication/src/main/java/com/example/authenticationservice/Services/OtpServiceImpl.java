@@ -59,7 +59,6 @@ public class OtpServiceImpl implements OtpService {
     private Otp createOtp(int otpCode, Account account) {
         Otp otp = new Otp();
         otp.setOtp(passwordEncoder.encode(String.valueOf(otpCode)));
-        otp.setId(account.getId());
         otp.setAccount(account);
         otp.setExpiryTime(LocalDateTime.now().plus(otpLifetime));
         return otp;
@@ -103,11 +102,7 @@ public class OtpServiceImpl implements OtpService {
         return otpRepository.save(otp);
     }
 
-    @Override
-    public Otp updateOtpById(Otp otp, Long id) {
-        otp.setId(id);
-        return otpRepository.save(otp);
-    }
+
 
     @Override
     public void deleteOtp(Long id) {

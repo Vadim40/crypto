@@ -19,9 +19,9 @@ public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column
+    @Column(nullable = false)
     private String password;
-    @Column
+    @Column(nullable = false)
     private String email;
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -33,7 +33,9 @@ public class Account {
     private List<Role> roles = new ArrayList<>();
     @OneToOne(mappedBy = "account")
     private Otp otp ;
+    @OneToOne(mappedBy = "account")
+    private RefreshToken refreshToken ;
 
-    @Column
+    @Column(nullable = false)
     private boolean otpEnabled;
 }
