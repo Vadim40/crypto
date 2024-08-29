@@ -3,8 +3,9 @@ package com.example.authenticationservice.Services;
 import com.example.authenticationservice.Exceptions.AccountNotFoundException;
 import com.example.authenticationservice.Exceptions.PasswordNotMatchException;
 import com.example.authenticationservice.Kafka.AuthenticationProducer;
+import com.example.authenticationservice.Kafka.DTOs.PasswordChangeEvent;
 import com.example.authenticationservice.Models.Account;
-import com.example.authenticationservice.Kafka.DTOs.AccountCreationConfirmation;
+import com.example.authenticationservice.Kafka.DTOs.AccountCreationEvent;
 import com.example.authenticationservice.Models.Enums.Role;
 import com.example.authenticationservice.Repositories.AccountRepository;
 import com.example.authenticationservice.Services.Interfaces.AccountService;
@@ -13,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,13 +38,13 @@ public class AccountServiceImpl implements AccountService {
         account.setRoles(new ArrayList<>(List.of(Role.ROLE_USER)));
         account.setPassword(passwordEncoder.encode(account.getPassword()));
         Account savedAccount= accountRepository.save(account);
-        sendAccountCreationConfirmation(savedAccount);
+        sendAccountCreationEvent(savedAccount);
         return  savedAccount;
     }
 
-    private void sendAccountCreationConfirmation(Account account) {
-        AccountCreationConfirmation accountCreationConfirmation = new AccountCreationConfirmation(account.getEmail(), account.getId());
-        authenticationProducer.sendAccountCreationConfirmation(accountCreationConfirmation);
+    private void sendAccountCreationEvent(Account account) {
+        AccountCreationEvent accountCreationEvent = new AccountCreationEvent(account.getEmail(), account.getId());
+        authenticationProducer.sendAccountCreationConfirmation(accountCreationEvent);
     }
 
     @Override
@@ -79,10 +81,16 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public void changePassword(String newPassword) {
+    public void changePassword(String newPassword, String ip) {
         Account account = userDetailsService.getAuthenticatedUser();
         account.setPassword(passwordEncoder.encode(newPassword));
         saveAccount(account);
+        sendPasswordChangeEvent(account, ip);
+    }
+
+    private void sendPasswordChangeEvent(Account account, String ip) {
+        PasswordChangeEvent passwordChangeEvent=new PasswordChangeEvent(account.getId(),account.getEmail(), LocalDateTime.now(),ip);
+        authenticationProducer.sendPasswordChangeEvent(passwordChangeEvent);
     }
 
     @Override

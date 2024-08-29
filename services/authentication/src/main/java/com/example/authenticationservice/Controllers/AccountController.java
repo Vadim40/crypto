@@ -5,6 +5,7 @@ import com.example.authenticationservice.Models.Account;
 import com.example.authenticationservice.Models.DTOs.AccountCreationRequest;
 import com.example.authenticationservice.Models.DTOs.AccountDTO;
 import com.example.authenticationservice.Services.AccountServiceImpl;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,8 +50,9 @@ public class AccountController {
 
     @Validated
     @PutMapping("/change-password")
-    public ResponseEntity<Object> changePassword(@RequestParam String newPassword) {
-        accountService.changePassword(newPassword);
+    public ResponseEntity<Object> changePassword(@RequestParam String newPassword, HttpServletRequest httpServletRequest) {
+        String remoteIp=httpServletRequest.getRemoteAddr();
+        accountService.changePassword(newPassword, remoteIp);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

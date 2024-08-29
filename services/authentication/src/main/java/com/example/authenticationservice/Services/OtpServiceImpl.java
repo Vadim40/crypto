@@ -4,6 +4,8 @@ import com.example.authenticationservice.Exceptions.InvalidOtpException;
 import com.example.authenticationservice.Exceptions.OtpExpiredException;
 import com.example.authenticationservice.Exceptions.OtpNotEnabledException;
 import com.example.authenticationservice.Exceptions.OtpNotFoundException;
+import com.example.authenticationservice.Kafka.AuthenticationProducer;
+import com.example.authenticationservice.Kafka.DTOs.OtpVerification;
 import com.example.authenticationservice.Models.Account;
 import com.example.authenticationservice.Models.Otp;
 import com.example.authenticationservice.Repositories.OtpRepository;
@@ -26,6 +28,7 @@ public class OtpServiceImpl implements OtpService {
     private final OtpRepository otpRepository;
     private final PasswordEncoder passwordEncoder;
     private final AccountService accountService;
+    private final AuthenticationProducer authenticationProducer;
 
 
     @Value("${otp.lifetime}")
@@ -39,7 +42,13 @@ public class OtpServiceImpl implements OtpService {
         Otp otp = createOtp(otpCode, account);
         otpRepository.save(otp);
         log.info("Otp code: " + otpCode);
+        sendOtpVerification(account, otpCode);
         return String.valueOf(otpCode);
+    }
+
+    private void sendOtpVerification(Account account, int otpCode) {
+        OtpVerification otpVerification=new OtpVerification(account.getId(),account.getEmail(), otpCode);
+        authenticationProducer.sendOtpVerification(otpVerification);
     }
 
     private int generateOtpCode() {

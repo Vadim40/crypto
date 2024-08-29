@@ -1,6 +1,6 @@
 package com.example.authenticationservice.Kafka.DTOs;
 
-public record AccountCreationConfirmation(
+public record AccountCreationEvent(
         String email,
         Long id
 ) {

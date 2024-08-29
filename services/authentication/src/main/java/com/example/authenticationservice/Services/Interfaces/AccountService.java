@@ -17,7 +17,7 @@ public interface AccountService {
 
     void comparePassword(String oldPassword);
 
-    void changePassword(String newPassword);
+    void changePassword(String newPassword, String ip);
 
     boolean isEmailExists(String email);
 

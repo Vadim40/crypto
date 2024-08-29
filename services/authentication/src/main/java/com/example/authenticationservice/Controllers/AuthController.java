@@ -3,6 +3,7 @@ package com.example.authenticationservice.Controllers;
 import com.example.authenticationservice.Models.DTOs.JwtRequest;
 import com.example.authenticationservice.Models.DTOs.JwtResponse;
 import com.example.authenticationservice.Services.Interfaces.AuthenticationService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -19,17 +20,18 @@ public class AuthController {
 
 
     @PostMapping("/auth")
-    public ResponseEntity<Object> createAuthToken(@RequestBody JwtRequest authRequest) {
+    public ResponseEntity<Object> createAuthToken(@RequestBody JwtRequest authRequest, HttpServletRequest httpServletRequest) {
+        String remoteIp=httpServletRequest.getRemoteAddr();
         authenticationService.authenticate(authRequest.getEmail(), authRequest.getPassword());
-        JwtResponse jwtResponse = new JwtResponse(authenticationService.generateJwtBasedOnOtp(authRequest.getEmail()));
+        JwtResponse jwtResponse = new JwtResponse(authenticationService.generateJwtBasedOnOtp(authRequest.getEmail(),remoteIp));
         return new ResponseEntity<>(jwtResponse, HttpStatus.OK);
     }
 
 
     @PostMapping("/verify-otp")
-    public ResponseEntity<Object> verifyOtp( @RequestParam String otp) {
-
-        JwtResponse jwtResponse = new JwtResponse(authenticationService.verifyOtpAndGenerateJwt(otp));
+    public ResponseEntity<Object> verifyOtp( @RequestParam String otp, HttpServletRequest httpServletRequest) {
+        String remoteIp=httpServletRequest.getRemoteAddr();
+        JwtResponse jwtResponse = new JwtResponse(authenticationService.verifyOtpAndGenerateJwt(otp, remoteIp));
         return new ResponseEntity<>(jwtResponse, HttpStatus.OK);
     }
 //    @PostMapping("/logout")
