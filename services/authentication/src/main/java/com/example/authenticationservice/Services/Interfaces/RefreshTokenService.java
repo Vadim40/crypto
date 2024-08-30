@@ -8,6 +8,8 @@ public interface RefreshTokenService {
     RefreshToken findRefreshTokenByToken(String email);
     void deleteTokenByAccountEmail(String email);
 
+    void deleteExpiredTokens();
+
 
 
 

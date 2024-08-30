@@ -11,6 +11,7 @@ import com.example.authenticationservice.Services.Interfaces.RefreshTokenService
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,7 +44,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         RefreshToken refreshToken = new RefreshToken();
         refreshToken.setTokenHash(tokenHash);
         refreshToken.setAccount(account);
-        refreshToken.setExpiryDate(LocalDateTime.now().plus(refreshLifeTime));
+        refreshToken.setExpiryTime(LocalDateTime.now().plus(refreshLifeTime));
         refreshTokenRepository.save(refreshToken);
     }
 
@@ -64,7 +65,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     }
 
     private void checkExpiredTime(RefreshToken refreshToken) {
-        if (refreshToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+        if (refreshToken.getExpiryTime().isBefore(LocalDateTime.now())) {
             throw new RefreshTokenExpiredException("Expire refresh token");
         }
     }
@@ -84,5 +85,12 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Transactional
     public void deleteTokenByAccountEmail(String email) {
         refreshTokenRepository.deleteRefreshTokenByAccountEmail(email);
+    }
+
+    @Override
+    @Transactional
+    @Scheduled(fixedRate = 36000000)
+    public void deleteExpiredTokens() {
+
     }
 }
