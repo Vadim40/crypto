@@ -34,7 +34,7 @@ public class AuthenticationProducer {
                 userLoginEvent.accountId(), userLoginEvent.email());
         Message<UserLoginEvent> message = MessageBuilder
                 .withPayload(userLoginEvent)
-                .setHeader(KafkaHeaders.TOPIC, "user-login-events")
+                .setHeader(KafkaHeaders.TOPIC, "user-login-event")
                 .build();
        kafkaTemplate.send(message);
     }
@@ -44,7 +44,7 @@ public class AuthenticationProducer {
                 passwordChangeEvent.accountId(), passwordChangeEvent.email());
         Message<PasswordChangeEvent> message = MessageBuilder
                 .withPayload(passwordChangeEvent)
-                .setHeader(KafkaHeaders.TOPIC, "password-change-events")
+                .setHeader(KafkaHeaders.TOPIC, "password-change-event")
                 .build();
         kafkaTemplate.send(message);
     }
