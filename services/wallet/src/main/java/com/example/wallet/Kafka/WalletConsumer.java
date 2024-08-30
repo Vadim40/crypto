@@ -1,6 +1,6 @@
 package com.example.wallet.Kafka;
 
-import com.example.wallet.Kafka.DTOs.AccountCreationConfirmation;
+import com.example.wallet.Kafka.DTOs.AccountCreationEvent;
 import com.example.wallet.Kafka.DTOs.ExchangeConfirmation;
 import com.example.wallet.Services.Interfaces.TransactionService;
 import com.example.wallet.Services.Interfaces.WalletService;
@@ -16,10 +16,10 @@ public class WalletConsumer {
     private final WalletService walletService;
     private final TransactionService transactionService;
 
-    @KafkaListener(topics ="authentication-topic")
-    public void consumeAccountCreationConfirmation(AccountCreationConfirmation creationConfirmation){
-        log.info("Consuming the message from authentication-topic Topic: {}", creationConfirmation);
-        walletService.createAndSaveWallet(creationConfirmation.id());
+    @KafkaListener(topics ="account-creation")
+    public void consumeAccountCreationConfirmation(AccountCreationEvent accountCreationEvent){
+        log.info("Consuming the message from account-creation Topic: {}", accountCreationEvent);
+        walletService.createAndSaveWallet(accountCreationEvent.id());
     }
     @KafkaListener(topics ="exchange-topic")
     public void consumeExchangeConfirmation(ExchangeConfirmation exchangeConfirmation){

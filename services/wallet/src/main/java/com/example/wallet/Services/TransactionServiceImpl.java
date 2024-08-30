@@ -2,6 +2,8 @@ package com.example.wallet.Services;
 
 import com.example.wallet.Exceptions.TransactionNotFoundException;
 import com.example.wallet.Kafka.DTOs.ExchangeConfirmation;
+import com.example.wallet.Kafka.DTOs.TransactionConfirmation;
+import com.example.wallet.Kafka.WalletProducer;
 import com.example.wallet.Models.*;
 import com.example.wallet.Models.DTO.*;
 import com.example.wallet.Models.Enum.TransactionType;
@@ -14,7 +16,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -25,6 +29,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final WalletService walletService;
     private final AccountService accountService;
     private final TransactionRepository transactionRepository;
+    private final WalletProducer walletProducer;
 
     @Override
     public Transaction findTransactionById(Long id) {
@@ -95,8 +100,24 @@ public class TransactionServiceImpl implements TransactionService {
         Wallet destinationWallet = walletService.findWalletByAddress(request.destinationAddress());
 
         tokenService.transferTokens(request.tokenSymbol(), request.amount(), sourceWallet, destinationWallet);
-
         createAndSaveTransferTransaction(accountResponse.id(), sourceWallet, destinationWallet, request);
+
+       sendTransactionConfirmation(sourceWallet.getAddress(),accountResponse.email()
+               ,request.tokenSymbol(),
+               request.amount(),
+               destinationWallet.getAddress());
+    }
+
+    private void sendTransactionConfirmation(String sourceAddress, String email, String tokenSymbol, BigDecimal amount, String destinationAddress) {
+        TransactionConfirmation transactionConfirmation=new TransactionConfirmation(
+                email,
+                LocalDateTime.now(),
+                tokenSymbol,
+                amount,
+                sourceAddress,
+                destinationAddress
+        );
+        walletProducer.sendTransactionConfirmation(transactionConfirmation);
     }
 
     private void processTokenDeposit(AccountResponse accountResponse, DepositRequest request) {
@@ -113,6 +134,11 @@ public class TransactionServiceImpl implements TransactionService {
         tokenService.subtractTokens(request.tokenSymbol(), request.amount(), wallet);
 
         createAndSaveWithdrawalTransaction(accountResponse.id(), wallet, request);
+
+        sendTransactionConfirmation(wallet.getAddress(),accountResponse.email()
+                ,request.tokenSymbol(),
+                request.amount(),
+                request.destinationAddress());
     }
 
     private void processTokenReceive(AccountResponse accountResponse, ReceiveRequest request) {
@@ -153,7 +179,8 @@ public class TransactionServiceImpl implements TransactionService {
     private void createAndSaveDepositTransaction(Long accountId, Wallet wallet, DepositRequest request) {
         DepositTransaction transaction = new DepositTransaction();
         transaction.setAccountId(accountId);
-        transaction.setWallet(wallet);
+        transaction.setDestinationWallet(wallet);
+        transaction.setSourceAddress(request.sourceAddress());
         transaction.setTokenSymbol(request.tokenSymbol());
         transaction.setAmount(request.amount());
         transaction.setTransactionDate(LocalDate.now());
@@ -165,7 +192,8 @@ public class TransactionServiceImpl implements TransactionService {
     private void createAndSaveWithdrawalTransaction(Long accountId, Wallet wallet, WithdrawalRequest request) {
         WithdrawalTransaction transaction = new WithdrawalTransaction();
         transaction.setAccountId(accountId);
-        transaction.setWallet(wallet);
+        transaction.setSourceWallet(wallet);
+        transaction.setDestinationAddress(request.destinationAddress());
         transaction.setTokenSymbol(request.tokenSymbol());
         transaction.setAmount(request.amount());
         transaction.setTransactionDate(LocalDate.now());

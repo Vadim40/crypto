@@ -10,6 +10,13 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
   kafka:
+    producer:
+      bootstrap-servers: localhost:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.type.mapping: transactionConfirmation:com.example.wallet.Kafka.DTOs.TransactionConfirmation
+
     consumer:
       bootstrap-servers: localhost:9092
       group-id: walletGroup
@@ -18,7 +25,7 @@ spring:
       properties:
         spring.json.trusted.packages: '*'
         spring.json.type.mapping: |
-          authenticationConfirmation:com.example.wallet.Kafka.DTOs.AccountCreationConfirmation,
+          accountCreationEvent:com.example.wallet.Kafka.DTOs.AccountCreationEvent,
           exchangeConfirmation:com.example.wallet.Kafka.DTOs.ExchangeConfirmation
       auto-offset-reset: earliest
 

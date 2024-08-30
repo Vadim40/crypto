@@ -17,8 +17,10 @@ import java.math.BigDecimal;
 public class DepositTransaction extends Transaction {
 
     @ManyToOne
-    @JoinColumn(name = "wallet_id", nullable = false)
-    private Wallet wallet;
+    @JoinColumn(name = "destination_wallet_id", nullable = false)
+    private Wallet destinationWallet;
+    @Column(name = "source_address", nullable = false)
+    private String sourceAddress;
 
     @Column(name = "token_symbol", nullable = false)
     private String tokenSymbol;

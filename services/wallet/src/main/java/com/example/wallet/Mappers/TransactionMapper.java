@@ -43,7 +43,7 @@ public class TransactionMapper {
                 transaction.getId(),
                 transaction.getAccountId(),
                 transaction.getTransactionType(),
-                transaction.getWallet() != null ? transaction.getWallet().getAddress() : null,
+                transaction.getDestinationWallet() != null ? transaction.getDestinationWallet().getAddress() : null,
                 transaction.getTokenSymbol(),
                 transaction.getAmount(),
                 transaction.getTransactionDate()
@@ -55,7 +55,7 @@ public class TransactionMapper {
                 transaction.getId(),
                 transaction.getAccountId(),
                 transaction.getTransactionType(),
-                transaction.getWallet() != null ? transaction.getWallet().getAddress() : null,
+                transaction.getSourceWallet() != null ? transaction.getSourceWallet().getAddress() : null,
                 transaction.getTokenSymbol(),
                 transaction.getAmount(),
                 transaction.getTransactionDate()
