@@ -14,12 +14,13 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class RefreshToken {
     @Id
+    private Long id;
     @OneToOne
     @MapsId
     @JoinColumn
     private Account account;
     @Column(nullable = false)
-    private String token;
+    private String tokenHash;
     @Column(nullable = false)
     private LocalDateTime expiryDate;
 }

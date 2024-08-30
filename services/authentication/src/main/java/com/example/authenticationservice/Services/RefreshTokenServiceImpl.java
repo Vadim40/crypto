@@ -6,8 +6,10 @@ import com.example.authenticationservice.Exceptions.RefreshTokenValidationExcept
 import com.example.authenticationservice.Models.Account;
 import com.example.authenticationservice.Models.RefreshToken;
 import com.example.authenticationservice.Repositories.RefreshTokenRepository;
+import com.example.authenticationservice.Services.Interfaces.AccountService;
 import com.example.authenticationservice.Services.Interfaces.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -19,47 +21,66 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class RefreshTokenServiceImpl implements RefreshTokenService {
     private final RefreshTokenRepository refreshTokenRepository;
+    private final AccountService accountService;
     @Value("${jwt.lifetime.refresh}")
     private Duration refreshLifeTime;
 
     @Override
-    public RefreshToken createRefreshToken(Account account) {
+    public String createRefreshToken(String email) {
+        Account account = accountService.findAccountByEmail(email);
+        String token = generateRefreshToken();
+        saveRefreshToken(account, token);
+        return token;
+    }
+
+    private String generateRefreshToken() {
+        return UUID.randomUUID().toString();
+    }
+
+    private void saveRefreshToken(Account account, String token) {
+        String tokenHash = hashToken(token);
         RefreshToken refreshToken = new RefreshToken();
-        String token = UUID.randomUUID().toString();
-        refreshToken.setToken(token);
+        refreshToken.setTokenHash(tokenHash);
         refreshToken.setAccount(account);
         refreshToken.setExpiryDate(LocalDateTime.now().plus(refreshLifeTime));
-        return refreshTokenRepository.save(refreshToken);
+        refreshTokenRepository.save(refreshToken);
     }
+
 
     @Override
-    public void validateRefreshToken(Account account, String token) {
-        RefreshToken refreshToken = findByAccount(account);
-        compareTokens(refreshToken, token, account);
-        checkExpiredTime(refreshToken, account);
+    public String validateRefreshTokenReturnEmail(String token) {
+        RefreshToken refreshToken = findRefreshTokenByToken(token);
+        compareTokens(refreshToken, token);
+        checkExpiredTime(refreshToken);
+        return refreshToken.getAccount().getEmail();
     }
 
-    private void compareTokens(RefreshToken refreshToken, String token, Account account) {
-
-        if (!refreshToken.getToken().equals(token)) {
-            throw new RefreshTokenValidationException("Refresh token for this account:" + account + " not found");
+    private void compareTokens(RefreshToken refreshToken, String token) {
+        String tokenHash = hashToken(token);
+        if (!refreshToken.getTokenHash().equals(tokenHash)) {
+            throw new RefreshTokenValidationException("Invalid refresh token");
         }
     }
 
-    private void checkExpiredTime(RefreshToken refreshToken, Account account) {
+    private void checkExpiredTime(RefreshToken refreshToken) {
         if (refreshToken.getExpiryDate().isBefore(LocalDateTime.now())) {
-            throw new RefreshTokenExpiredException("Refresh token for this account:" + account + " is expired");
+            throw new RefreshTokenExpiredException("Expire refresh token");
         }
     }
 
     @Override
-    public RefreshToken findByAccount(Account account) {
-        return refreshTokenRepository.findRefreshTokenByAccount(account)
-                .orElseThrow(() -> new RefreshTokenNotFoundException("Refresh token for this account:" + account + " not found"));
+    public RefreshToken findRefreshTokenByToken(String token) {
+        String hashToken = hashToken(token);
+        return refreshTokenRepository.findRefreshTokenByTokenHash(hashToken)
+                .orElseThrow(() -> new RefreshTokenNotFoundException("Refresh token not found"));
+    }
+
+    private String hashToken(String token) {
+        return DigestUtils.sha256Hex(token);
     }
 
     @Override
-    public void deleteTokenByAccount(Account account) {
-        refreshTokenRepository.deleteRefreshTokenByAccount(account);
+    public void deleteTokenByAccountEmail(String email) {
+        refreshTokenRepository.deleteRefreshTokenByAccountEmail(email);
     }
 }

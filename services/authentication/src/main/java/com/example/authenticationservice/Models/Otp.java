@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class Otp {
     @Id
+    private Long id;
     @OneToOne
     @MapsId
     @JoinColumn

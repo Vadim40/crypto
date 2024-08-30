@@ -3,20 +3,17 @@ package com.example.authenticationservice.Services;
 import com.example.authenticationservice.Kafka.AuthenticationProducer;
 import com.example.authenticationservice.Kafka.DTOs.UserLoginEvent;
 import com.example.authenticationservice.Models.Account;
-import com.example.authenticationservice.Services.Interfaces.AccountService;
-import com.example.authenticationservice.Services.Interfaces.AuthenticationService;
-import com.example.authenticationservice.Services.Interfaces.JwtTokenService;
-import com.example.authenticationservice.Services.Interfaces.OtpService;
+import com.example.authenticationservice.Services.Interfaces.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -27,13 +24,19 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final AuthenticationProducer authenticationProducer;
     private final AccountService accountService;
+    private final RefreshTokenService refreshTokenService;
 
     @Override
-    public String verifyOtpAndGenerateJwt( String otp, String remoteIp) {
+    public Map<String, String> verifyOtpAndGenerateJwt(String otp, String remoteIp) {
         String email =userDetailsService.getAuthenticatedUser().getEmail();
         otpService.approveOtp(otp,email);
         sendUserLoginEvent(email, remoteIp);
-        return jwtTokenService.generateToken(email);
+        Map<String, String> tokens=new HashMap<>();
+        String accessToken= jwtTokenService.generateToken(email);
+        String refreshToken=refreshTokenService.createRefreshToken(email);
+        tokens.put("accessToken",accessToken);
+        tokens.put("refreshToken", refreshToken);
+        return tokens;
     }
 
     private void sendUserLoginEvent(String email, String remoteIp) {
@@ -42,14 +45,31 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public String generateJwtBasedOnOtp(String email, String remoteIp) {
+    public Map<String, String>generateJwtBasedOnOtp(String email, String remoteIp) {
+        Map<String, String> tokens=new HashMap<>();
         if (userDetailsService.isOtpEnabled(email)) {
             otpService.generateOtp(email);
-            return jwtTokenService.generateTokenOtp(email);
+         String accessTokenOtp=jwtTokenService.generateTokenOtp(email);
+         tokens.put("accessTokenOtp",accessTokenOtp);
         } else {
+
+            String accessToken= jwtTokenService.generateToken(email);
+            String refreshToken=refreshTokenService.createRefreshToken(email);
+            tokens.put("accessToken",accessToken);
+            tokens.put("refreshToken", refreshToken);
             sendUserLoginEvent(email,remoteIp);
-            return jwtTokenService.generateToken(email);
         }
+        return tokens;
+    }
+
+    @Override
+    public Map<String,String> refreshJwt(String refreshToken,String remoteIp) {
+        Map<String, String> tokens=new HashMap<>();
+        String email=refreshTokenService.validateRefreshTokenReturnEmail(refreshToken);
+        String accessToken=jwtTokenService.generateToken(email);
+        tokens.put("accessToken",accessToken);
+        sendUserLoginEvent(email,remoteIp);
+        return tokens;
     }
 
     @Override
@@ -60,5 +80,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         } catch (BadCredentialsException e) {
            throw new BadCredentialsException("wrong password or login");
         }
+    }
+
+    @Override
+    public void logout() {
+        String email =userDetailsService.getAuthenticatedUser().getEmail();
+        refreshTokenService.deleteTokenByAccountEmail(email);
     }
 }
