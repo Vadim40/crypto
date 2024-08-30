@@ -1,6 +1,5 @@
 package com.example.authenticationservice.Controllers;
 
-import com.example.authenticationservice.Kafka.AuthenticationProducer;
 import com.example.authenticationservice.Models.Account;
 import com.example.authenticationservice.Models.CustomUserDetails;
 import com.example.authenticationservice.Models.DTOs.JwtRequest;
@@ -25,7 +24,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
@@ -98,7 +96,7 @@ class AuthControllerTest {
 
         String jsonResponse = result.getResponse().getContentAsString();
         JwtResponse jwtResponse = objectMapper.readValue(jsonResponse, JwtResponse.class);
-        String jwtToken = jwtResponse.getToken();
+        String jwtToken = jwtResponse.tokens().get("access");
 
         boolean isOtpToken = jwtTokenUtils.isOtpToken(jwtToken);
         Assertions.assertThat(isOtpToken).isTrue();

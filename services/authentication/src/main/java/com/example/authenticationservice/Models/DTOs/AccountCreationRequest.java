@@ -8,13 +8,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class AccountCreationRequest {
-    @ValidPassword
-    private String password;
-    @Email(message = "The email address format is incorrect")
-    @UniqueEmail
-    private String email;
+public record AccountCreationRequest(
+        @ValidPassword
+        String password,
+        @Email(message = "The email address format is incorrect")
+        @UniqueEmail
+        String email
+) {
+
 }

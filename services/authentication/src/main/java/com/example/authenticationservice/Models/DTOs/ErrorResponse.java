@@ -4,12 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Data
-public class ErrorResponse {
-    private String error;
-    private String message;
-    private int status;
-    private String path;
+
+public record ErrorResponse(
+        String error,
+        String message,
+         int status,
+         String path
+) {
+
 }

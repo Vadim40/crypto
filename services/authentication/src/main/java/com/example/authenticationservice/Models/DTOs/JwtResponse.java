@@ -6,9 +6,9 @@ import lombok.NoArgsConstructor;
 
 import java.util.Map;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class JwtResponse {
-    private Map<String, String> tokens;
+
+public record JwtResponse(
+        Map<String, String> tokens
+) {
+
 }

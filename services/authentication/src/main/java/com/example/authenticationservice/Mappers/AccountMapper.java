@@ -8,15 +8,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class AccountMapper {
     public AccountDTO mapAccountToAccountDTO(Account account){
-        AccountDTO accountDTO=new AccountDTO();
-        accountDTO.setId(account.getId());
-        accountDTO.setEmail(account.getEmail());
-        return accountDTO;
+        return new AccountDTO(account.getId(), account.getEmail());
     }
     public Account mapAccountCreationRequestToAccount(AccountCreationRequest accountCreationRequest){
         Account account=new Account();
-        account.setEmail(accountCreationRequest.getEmail());
-        account.setPassword(accountCreationRequest.getPassword());
+        account.setEmail(accountCreationRequest.email());
+        account.setPassword(accountCreationRequest.password());
         return account;
     }
 }
