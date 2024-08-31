@@ -22,4 +22,4 @@ server:
 
 application:
   config:
-    authentication-url: http://localhost:8090/api/v1/account
+    authentication-url: http://localhost:8222/api/v1/accounts
