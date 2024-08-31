@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Login Notification</title>
+</head>
+<body>
+<h1>New Login to Your Account</h1>
+<p>Hello, <span th:text="${email}"></span>,</p>
+<p>We detected a new login to your account.</p>
+<p><strong>Login Time:</strong> <span th:text="${loginTimestamp}"></span></p>
+<p><strong>IP Address:</strong> <span th:text="${remoteIp}"></span></p>
+<p>If this was not you, please secure your account immediately.</p>
+</body>
+</html>

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction Confirmation</title>
+</head>
+<body>
+<h1>Transaction Confirmation</h1>
+<p>Hello, <span th:text="${email}"></span>,</p>
+<p>Your transaction has been processed successfully.</p>
+<p><strong>Transaction Time:</strong> <span th:text="${transactionTime}"></span></p>
+<p><strong>Token:</strong> <span th:text="${tokenSymbol}"></span></p>
+<p><strong>Amount:</strong> <span th:text="${amount}"></span></p>
+<p><strong>From:</strong> <span th:text="${sourceWallet}"></span></p>
+<p><strong>To:</strong> <span th:text="${destinationWallet}"></span></p>
+</body>
+</html>

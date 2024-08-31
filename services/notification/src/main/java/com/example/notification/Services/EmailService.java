@@ -17,7 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.example.notification.Models.Enums.EmailTemplates.OTP_VERIFICATION;
+import static com.example.notification.Models.Enums.EmailTemplates.*;
 
 @Service
 @RequiredArgsConstructor
@@ -33,18 +33,18 @@ public class EmailService {
 
     @Async
     public void sendAccountCreationEmail(AccountCreationEvent accountCreationEvent) throws MessagingException {
-        sendEmail(accountCreationEvent.email(), EmailTemplates.ACCOUNT_CREATION, accountCreationEvent);
+        sendEmail(accountCreationEvent.email(), ACCOUNT_CREATION, accountCreationEvent);
     }
 
 
     @Async
     public void sendTransactionConfirmationEmail(TransactionConfirmation transactionConfirmation) throws MessagingException {
-        sendEmail(transactionConfirmation.email(), EmailTemplates.TRANSACTION_CONFIRMATION, transactionConfirmation);
+        sendEmail(transactionConfirmation.email(), TRANSACTION_CONFIRMATION, transactionConfirmation);
     }
 
     @Async
     public void sendUserLoginEmail(UserLoginEvent userLoginEvent) throws MessagingException {
-        sendEmail(userLoginEvent.email(), EmailTemplates.USER_LOGIN, userLoginEvent);
+        sendEmail(userLoginEvent.email(), USER_LOGIN, userLoginEvent);
     }
 
     private void sendEmail(String toEmail, EmailTemplates template, Object dto) throws MessagingException {
@@ -79,7 +79,6 @@ public class EmailService {
             variables.put("otp", otp.otp());
         } else if (dto instanceof AccountCreationEvent account) {
             variables.put("email", account.email());
-            variables.put("id", account.id());
         } else if (dto instanceof TransactionConfirmation transaction) {
             variables.put("email", transaction.email());
             variables.put("transactionTime", transaction.transactionTime());
