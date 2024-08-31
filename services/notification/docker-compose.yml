@@ -12,6 +12,12 @@
         MONGO_INITDB_DATABASE: notification
       volumes:
         - notification-mongo-data:/data/db
+    mail-dev:
+      container_name: ms-mail-dev
+      image: maildev/maildev
+      ports:
+        - 1080:1080
+        - 1025:1025
 
 
 

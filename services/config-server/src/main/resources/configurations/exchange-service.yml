@@ -1,6 +1,4 @@
 spring:
-  application:
-    name: exchange
   datasource:
     url: jdbc:postgresql://localhost:5435/exchange_service
     username: user
