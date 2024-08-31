@@ -16,7 +16,11 @@ spring:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
         spring.json.type.mapping: transactionConfirmation:com.example.wallet.Kafka.DTOs.TransactionConfirmation
-
+    properties:
+      spring:
+        jackson:
+          serialization:
+            WRITE_DATES_AS_TIMESTAMPS: false
     consumer:
       bootstrap-servers: localhost:9092
       group-id: walletGroup

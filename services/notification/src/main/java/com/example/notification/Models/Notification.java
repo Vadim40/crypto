@@ -19,8 +19,6 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Data
 public class Notification {
-    @Id
-    private Long id;
     private LocalDate localDate;
     private NotificationType notificationType;
     private UserLoginEvent userLoginEvent;

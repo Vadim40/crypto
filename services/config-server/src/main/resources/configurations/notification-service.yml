@@ -37,7 +37,11 @@ spring:
           transactionConfirmation:com.example.notification.Kafka.DTOs.TransactionConfirmation,
           otpVerification:com.example.notification.Kafka.DTOs.OtpVerification
       auto-offset-reset: earliest
-
+    properties:
+      spring:
+        jackson:
+          serialization:
+            WRITE_DATES_AS_TIMESTAMPS: false
 
 server:
   port: 8050

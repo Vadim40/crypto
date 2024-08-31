@@ -41,7 +41,8 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     private void saveRefreshToken(Account account, String token) {
         String tokenHash = hashToken(token);
-        RefreshToken refreshToken = new RefreshToken();
+        RefreshToken refreshToken = refreshTokenRepository.findRefreshTokenByAccount(account)
+                .orElse(new RefreshToken());
         refreshToken.setTokenHash(tokenHash);
         refreshToken.setAccount(account);
         refreshToken.setExpiryTime(LocalDateTime.now().plus(refreshLifeTime));

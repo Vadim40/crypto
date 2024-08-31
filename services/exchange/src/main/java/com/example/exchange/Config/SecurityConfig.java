@@ -25,7 +25,7 @@ public class SecurityConfig {
         http.csrf().disable()
                 .cors().disable()
                 .authorizeHttpRequests()
-                .requestMatchers( "/api/v1/crypto-rate/**").hasAnyRole("USER","ADMIN")
+                .requestMatchers( "/api/v1/crypto-rates/**").hasAnyRole("USER","ADMIN")
                 .anyRequest().authenticated()
                 .and()
                 .exceptionHandling()

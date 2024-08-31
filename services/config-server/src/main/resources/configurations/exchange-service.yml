@@ -16,7 +16,11 @@ spring:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
         spring.json.type.mapping: exchangeConfirmation:com.example.exchange.Kafka.DTOs.ExchangeConfirmation
-
+    properties:
+      spring:
+        jackson:
+          serialization:
+            WRITE_DATES_AS_TIMESTAMPS: false
 server:
   port: 8060
 

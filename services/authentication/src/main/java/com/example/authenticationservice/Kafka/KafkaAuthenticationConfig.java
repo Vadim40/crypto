@@ -15,12 +15,12 @@ public class KafkaAuthenticationConfig {
 
     @Bean
     public NewTopic userLoginEventsTopic() {
-        return TopicBuilder.name("user-login-events").build();
+        return TopicBuilder.name("user-login-event").build();
     }
 
     @Bean
     public NewTopic passwordChangeEventsTopic() {
-        return TopicBuilder.name("password-change-events").build();
+        return TopicBuilder.name("password-change-event").build();
     }
 
     @Bean

@@ -41,7 +41,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private void sendUserLoginEvent(String email, String remoteIp) {
         Account account=accountService.findAccountByEmail(email);
-        UserLoginEvent userLoginEvent=new UserLoginEvent(account.getId(), account.getEmail(), LocalDateTime.now(), remoteIp);        authenticationProducer.sendUserLoginEvent(userLoginEvent);
+        UserLoginEvent userLoginEvent=new UserLoginEvent(account.getId(), account.getEmail(), LocalDateTime.now(), remoteIp);
+        authenticationProducer.sendUserLoginEvent(userLoginEvent);
     }
 
     @Override

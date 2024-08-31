@@ -17,5 +17,5 @@ spring:
           uri: lb://EXCHANGE-SERVICE
           predicates:
             - Path=/api/v1/crypto-rates/**
-  server:
-    port: 8222
+server:
+  port: 8222
