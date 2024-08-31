@@ -14,13 +14,13 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/auth")
 public class AuthController {
 
     private final AuthenticationService authenticationService;
 
 
-    @PostMapping("/auth")
+    @PostMapping("/login")
     public ResponseEntity<Object> createAuthToken(@RequestBody JwtRequest authRequest, HttpServletRequest httpServletRequest) {
         String remoteIp = httpServletRequest.getRemoteAddr();
         authenticationService.authenticate(authRequest.email(), authRequest.password());
