@@ -8,8 +8,6 @@ public interface OtpService {
     Otp findOtpById(Long id);
 
     Otp saveOtp(Otp otp);
-
-
     void deleteOtp(Long id);
 
 }

@@ -57,7 +57,7 @@ public class OtpServiceImpl implements OtpService {
     }
 
     private Otp createOtp(int otpCode, Account account) {
-        Otp otp = new Otp();
+        Otp otp =otpRepository.findOtpByAccount(account).orElse(new Otp());
         otp.setOtp(passwordEncoder.encode(String.valueOf(otpCode)));
         otp.setAccount(account);
         otp.setExpiryTime(LocalDateTime.now().plus(otpLifetime));
