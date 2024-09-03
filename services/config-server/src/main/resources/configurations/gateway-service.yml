@@ -4,8 +4,6 @@ spring:
       discovery:
         locator:
           enabled: true
-      default-filters:
-        - JwtAuthenticationFilter
       routes:
         - id: authentication-service
           uri: lb://AUTHENTICATION-SERVICE
