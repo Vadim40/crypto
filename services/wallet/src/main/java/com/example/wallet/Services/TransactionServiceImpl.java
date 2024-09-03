@@ -38,44 +38,44 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public List<Transaction> findAccountTransactionsByTransactionType(TransactionType transactionType) {
-        Long accountId = accountService.getCurrentAccount().id();
+    public List<Transaction> findAccountTransactionsByTransactionType(TransactionType transactionType, String email) {
+        Long accountId = accountService.findAccountByEmail(email).id();
         return transactionRepository.findTransactionsByTransactionTypeAndAccountId(transactionType, accountId)
                 .orElseThrow(() -> new TransactionNotFoundException("Transactions not found for type: " + transactionType));
     }
 
     @Override
-    public List<Transaction> findAccountTransactionsByTransactionTypeAfterDate(TransactionType transactionType, LocalDate date) {
-        Long accountId = accountService.getCurrentAccount().id();
+    public List<Transaction> findAccountTransactionsByTransactionTypeAfterDate(TransactionType transactionType, LocalDate date, String email) {
+        Long accountId = accountService.findAccountByEmail(email).id();
         return transactionRepository.findTransactionsByTransactionTypeAndTransactionDateAfterAndAccountId(transactionType, date, accountId)
                 .orElseThrow(() -> new TransactionNotFoundException("Transactions not found for type: " + transactionType + ", after date: " + date));
     }
 
     @Transactional
     @Override
-    public void transferTokens(TransferRequest request) {
-        AccountResponse accountResponse = accountService.getCurrentAccount();
+    public void transferTokens(TransferRequest request, String email) {
+        AccountResponse accountResponse = accountService.findAccountByEmail(email);
         processTokenTransfer(accountResponse, request);
     }
 
     @Transactional
     @Override
-    public void depositTokens(DepositRequest request) {
-        AccountResponse accountResponse = accountService.getCurrentAccount();
+    public void depositTokens(DepositRequest request, String email) {
+        AccountResponse accountResponse = accountService.findAccountByEmail(email);
         processTokenDeposit(accountResponse, request);
     }
 
     @Transactional
     @Override
-    public void withdrawTokens(WithdrawalRequest request) {
-        AccountResponse accountResponse = accountService.getCurrentAccount();
+    public void withdrawTokens(WithdrawalRequest request, String email) {
+        AccountResponse accountResponse = accountService.findAccountByEmail(email);
         processTokenWithdrawal(accountResponse, request);
     }
 
     @Transactional
     @Override
-    public void receiveTokens(ReceiveRequest request) {
-        AccountResponse accountResponse = accountService.getCurrentAccount();
+    public void receiveTokens(ReceiveRequest request, String email) {
+        AccountResponse accountResponse = accountService.findAccountByEmail(email);
         processTokenReceive(accountResponse, request);
     }
 

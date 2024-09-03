@@ -29,39 +29,52 @@ public class TransactionController {
     }
 
 
-
     @GetMapping("/transactions")
-    public ResponseEntity<List<TransactionDTO>> findTransactionsByTypeAfterDate(@RequestBody @Valid TransactionFilterRequest request) {
-        LocalDate date=getDefaultDate(request.date());
+    public ResponseEntity<List<TransactionDTO>> findTransactionsByTypeAfterDate(
+            @RequestBody @Valid TransactionFilterRequest request,
+            @RequestHeader(value = "X-User-Name") String email) {
+        LocalDate date = getDefaultDate(request.date());
         List<Transaction> transactions = transactionService
-                .findAccountTransactionsByTransactionTypeAfterDate(request.transactionType(),date);
+                .findAccountTransactionsByTransactionTypeAfterDate(request.transactionType(), date, email);
         List<TransactionDTO> transactionDTOs = transactions.stream()
                 .map(transactionMapper::mapTransactionToTransactionDTO)
                 .collect(Collectors.toList());
         return new ResponseEntity<>(transactionDTOs, HttpStatus.OK);
     }
+
     private LocalDate getDefaultDate(LocalDate date) {
         return date != null ? date : LocalDate.now().minusMonths(1);
     }
 
     @PostMapping("/transfer-tokens")
-    public ResponseEntity<Object> transferTokens(@RequestBody @Valid TransferRequest request) {
-        transactionService.transferTokens(request);
+    public ResponseEntity<Object> transferTokens(
+            @RequestBody @Valid TransferRequest request,
+            @RequestHeader(value = "X-User-Name") String email) {
+        transactionService.transferTokens(request, email);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
     @PostMapping("/deposit-tokens")
-    public ResponseEntity<Object> depositTokens(@RequestBody @Valid DepositRequest request) {
-        transactionService.depositTokens(request);
+    public ResponseEntity<Object> depositTokens(
+            @RequestBody @Valid DepositRequest request,
+            @RequestHeader(value = "X-User-Name") String email) {
+        transactionService.depositTokens(request, email);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
     @PostMapping("/withdrawal-tokens")
-    public ResponseEntity<Object> withdrawalTokens(@RequestBody @Valid WithdrawalRequest request) {
-        transactionService.withdrawTokens(request);
+    public ResponseEntity<Object> withdrawalTokens(
+            @RequestBody @Valid WithdrawalRequest request,
+            @RequestHeader(value = "X-User-Name") String email) {
+        transactionService.withdrawTokens(request, email);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
     @PostMapping("/receive-tokens")
-    public ResponseEntity<Object> receiveTokens(@RequestBody @Valid ReceiveRequest request) {
-        transactionService.receiveTokens(request);
+    public ResponseEntity<Object> receiveTokens(
+            @RequestBody @Valid ReceiveRequest request,
+            @RequestHeader(value = "X-User-Name") String email) {
+        transactionService.receiveTokens(request, email);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

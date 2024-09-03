@@ -18,11 +18,11 @@ public interface TransactionService {
 
     Transaction findTransactionById(Long id);
 
-    List<Transaction> findAccountTransactionsByTransactionType(TransactionType transactionType);
-    List<Transaction> findAccountTransactionsByTransactionTypeAfterDate(TransactionType transactionType, LocalDate date);
-    void transferTokens(TransferRequest request);
-    void depositTokens(DepositRequest request);
-    void withdrawTokens(WithdrawalRequest request);
-    void receiveTokens(ReceiveRequest request);
+    List<Transaction> findAccountTransactionsByTransactionType(TransactionType transactionType, String email);
+    List<Transaction> findAccountTransactionsByTransactionTypeAfterDate(TransactionType transactionType, LocalDate date, String email);
+    void transferTokens(TransferRequest request, String email);
+    void depositTokens(DepositRequest request,String email);
+    void withdrawTokens(WithdrawalRequest request, String email);
+    void receiveTokens(ReceiveRequest request, String email);
     void exchangeTokens(ExchangeConfirmation confirmation);
 }
