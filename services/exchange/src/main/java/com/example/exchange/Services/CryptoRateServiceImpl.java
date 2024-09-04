@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -54,14 +55,14 @@ public class CryptoRateServiceImpl implements CryptoRateService {
         CryptoRate cryptoRate = findCryptoRate(baseCurrency, targetCurrency);
         BigDecimal rate = cryptoRate.getRate();
         BigDecimal amountTo = amount.multiply(rate);
-        LocalDate localDate = LocalDate.now();
+        LocalDateTime localDateTime = LocalDateTime.now();
         return new ExchangeConfirmation(
                 accountResponse.id(),
                 baseCurrency,
                 targetCurrency,
                 amount,
                 amountTo,
-                localDate
+                localDateTime
         );
     }
 }

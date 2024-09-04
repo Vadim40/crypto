@@ -25,7 +25,7 @@ public class CryptoRateController {
         CryptoRateDTO cryptoRateDTO=cryptoRateMapper.mapCryptoRateToCryptoRateDTO(cryptoRate);
         return new ResponseEntity<>(cryptoRateDTO, HttpStatus.OK);
     }
-    @GetMapping("/convert")
+    @PostMapping("/convert")
     ResponseEntity<Object> convertCurrencies(
             @Valid @RequestBody ConvertRequest request,
             @RequestHeader(value = "X-User-Name") String email){
