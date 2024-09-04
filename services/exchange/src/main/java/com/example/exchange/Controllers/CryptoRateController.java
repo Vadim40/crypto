@@ -11,10 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,8 +26,10 @@ public class CryptoRateController {
         return new ResponseEntity<>(cryptoRateDTO, HttpStatus.OK);
     }
     @GetMapping("/convert")
-    ResponseEntity<Object> convertCurrencies(@Valid @RequestBody ConvertRequest request){
-        cryptoRateService.executeCurrencyConversion(request.baseCurrency(),request.targetCurrency(), request.amount());
+    ResponseEntity<Object> convertCurrencies(
+            @Valid @RequestBody ConvertRequest request,
+            @RequestHeader(value = "X-User-Name") String email){
+        cryptoRateService.executeCurrencyConversion(request.baseCurrency(),request.targetCurrency(), request.amount(), email);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

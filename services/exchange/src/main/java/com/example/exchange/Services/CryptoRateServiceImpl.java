@@ -35,8 +35,8 @@ public class CryptoRateServiceImpl implements CryptoRateService {
     }
 
     @Override
-    public void executeCurrencyConversion(String baseCurrency, String targetCurrency, BigDecimal amount) {
-        AccountResponse accountResponse = accountService.getCurrentAccount();
+    public void executeCurrencyConversion(String baseCurrency, String targetCurrency, BigDecimal amount, String email) {
+        AccountResponse accountResponse = accountService.findAccountByEmail(email);
         ExchangeConfirmation exchangeConfirmation = createExchangeConfirmation(
                 baseCurrency, targetCurrency, amount, accountResponse);
         exchangeProducer.sendExchangeConfirmation(exchangeConfirmation);
