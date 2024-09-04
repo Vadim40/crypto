@@ -1,5 +1,8 @@
 # Crypto Exchange Simulation  
-This application simulates a cryptocurrency exchange platform using Spring Framework, Kafka, and Spring Cloud.
+This application simulates a cryptocurrency exchange platform using Spring Framework, Kafka, and Spring Cloud.    
+
+![image](https://github.com/user-attachments/assets/c6d69082-ef91-4b5c-8ae4-cfb4454cd5b2)   
+
 
 ## Services Overview  
 ### Authentication Service  
@@ -11,6 +14,6 @@ Manages wallet data and implements the logic for token transactions. It is respo
 ### Exchange Service  
 Handles the logic for token exchanges. It fetches current exchange rates from external APIs, updates, and temporarily stores this data for processing.
 
-### Email Service  
+### Notification 
 Manages the sending of email notifications, including OTPs for authentication and codes for token transfer confirmation.
 
