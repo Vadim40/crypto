@@ -16,6 +16,10 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
+        delivery-timeout.ms: 120000
+        retries: 100
+        enable.idempotence: true
+        acks: all
         spring.json.type.mapping: |
           accountCreationEvent:com.example.authenticationservice.Kafka.DTOs.AccountCreationEvent,
           otpVerification:com.example.authenticationservice.Kafka.DTOs.OtpVerification,
