@@ -2,55 +2,53 @@ version: "3.8"
 
 services:
   zookeeper:
-    image: confluentinc/cp-zookeeper:latest
     container_name: zookeeper
+    image: confluentinc/cp-zookeeper:latest
     environment:
-      ZOOKEEPER_SERVER_ID: 1
       ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
     ports:
-      - "22181:2181"
+      - "2181:2181"
     networks:
       - microservices-net
 
-  kafka-broker-1:
+  kafka-1:
     image: confluentinc/cp-kafka:latest
-    container_name: kafka-broker-1
+    container_name: kafka-1
     ports:
-      - "9092:9092"
-    depends_on:
-      - zookeeper
+      - '19092:19092'
+      - '9092:9092'
     environment:
       KAFKA_BROKER_ID: 1
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 2
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_LISTENERS: INSIDE://kafka-broker-1:9093,PLAINTEXT://localhost:9092
-      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka-broker-1:9093,PLAINTEXT://localhost:9092
-    networks:
-      - microservices-net
-
-  kafka-broker-2:
-    image: confluentinc/cp-kafka:latest
-    container_name: kafka-broker-2
-    ports:
-      - "9094:9092"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_INTERNAL:PLAINTEXT,LISTENER_EXTERNAL:PLAINTEXT
+      KAFKA_LISTENERS: LISTENER_INTERNAL://kafka-1:19092,LISTENER_EXTERNAL://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: LISTENER_INTERNAL://kafka-1:19092,LISTENER_EXTERNAL://localhost:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
+      KAFKA_LOG4J_LOGGERS: "kafka.server=DEBUG,kafka.network=TRACE"
     depends_on:
       - zookeeper
-    environment:
-      KAFKA_BROKER_ID: 2
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 2
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_LISTENERS: INSIDE://kafka-broker-2:9094,PLAINTEXT://localhost:9093
-      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka-broker-2:9094,PLAINTEXT://localhost:9093
     networks:
       - microservices-net
 
+  kafka-2:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka-2
+    ports:
+      - '29092:29092'
+      - '9093:9093'
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_INTERNAL:PLAINTEXT,LISTENER_EXTERNAL:PLAINTEXT
+      KAFKA_LISTENERS: LISTENER_INTERNAL://kafka-2:29092,LISTENER_EXTERNAL://localhost:9093
+      KAFKA_ADVERTISED_LISTENERS: LISTENER_INTERNAL://kafka-2:29092,LISTENER_EXTERNAL://localhost:9093
+      KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
+    depends_on:
+      - zookeeper
+    networks:
+      - microservices-net
   zipkin:
     container_name: zipkin
     image: openzipkin/zipkin
@@ -59,3 +57,4 @@ services:
 
 networks:
   microservices-net:
+    driver: bridge

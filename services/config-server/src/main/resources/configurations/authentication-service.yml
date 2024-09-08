@@ -12,13 +12,10 @@ spring:
 
   kafka:
     producer:
-      bootstrap-servers: localhost:9092
+      bootstrap-servers: localhost:9092, localhost:9093
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
-        delivery-timeout.ms: 120000
-        retries: 100
-        enable.idempotence: true
         acks: all
         spring.json.type.mapping: |
           accountCreationEvent:com.example.authenticationservice.Kafka.DTOs.AccountCreationEvent,
@@ -37,3 +34,10 @@ spring:
 
 server:
   port: 8090
+
+logging:
+  level:
+    org.apache.kafka: DEBUG
+    org.springframework.kafka: DEBUG
+    org.apache.kafka.clients: DEBUG
+    org.apache.kafka.common: DEBUG
