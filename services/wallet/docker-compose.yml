@@ -14,10 +14,30 @@ services:
       - POSTGRES_DB=wallet_service
     networks:
       - wallet-net
+  redis:
+    image: redis:latest
+    container_name: redis
+    volumes:
+      - wallet-redis-data:/data
+    ports:
+      - 6379:6379
+    networks:
+      - wallet-net
+  redis_insight:
+    image: redislabs/redisinsight:latest
+    container_name: redis_insight
+    ports:
+      - 5540:5540
+    volumes:
+      - wallet-redis-insight-data:/db
+    networks:
+      - wallet-net
 
 
 volumes:
   wallet-postgres-data:
+  wallet-redis-data:
+  wallet-redis-insight-data:
 
 networks:
   wallet-net:
