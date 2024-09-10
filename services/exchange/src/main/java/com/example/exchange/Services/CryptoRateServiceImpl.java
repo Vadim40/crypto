@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Service
@@ -37,9 +36,9 @@ public class CryptoRateServiceImpl implements CryptoRateService {
 
     @Override
     public void executeCurrencyConversion(String baseCurrency, String targetCurrency, BigDecimal amount, String email) {
-        AccountResponse accountResponse = accountService.findAccountByEmail(email);
+        Long accountId= accountService.findAccountIdByEmail(email);
         ExchangeConfirmation exchangeConfirmation = createExchangeConfirmation(
-                baseCurrency, targetCurrency, amount, accountResponse);
+                baseCurrency, targetCurrency, amount, accountId);
         exchangeProducer.sendExchangeConfirmation(exchangeConfirmation);
     }
 
@@ -51,13 +50,13 @@ public class CryptoRateServiceImpl implements CryptoRateService {
         cryptoRateRepository.save(savedRate);
     }
 
-    private ExchangeConfirmation createExchangeConfirmation(String baseCurrency, String targetCurrency, BigDecimal amount, AccountResponse accountResponse) {
+    private ExchangeConfirmation createExchangeConfirmation(String baseCurrency, String targetCurrency, BigDecimal amount, Long accountId) {
         CryptoRate cryptoRate = findCryptoRate(baseCurrency, targetCurrency);
         BigDecimal rate = cryptoRate.getRate();
         BigDecimal amountTo = amount.multiply(rate);
         LocalDateTime localDateTime = LocalDateTime.now();
         return new ExchangeConfirmation(
-                accountResponse.id(),
+                accountId,
                 baseCurrency,
                 targetCurrency,
                 amount,

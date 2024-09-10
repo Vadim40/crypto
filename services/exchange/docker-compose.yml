@@ -14,10 +14,20 @@ services:
       - POSTGRES_DB=exchange_service
     networks:
       - exchange-net
+  redis:
+    image: redis:latest
+    container_name: redis_exchange
+    volumes:
+      - exchange-redis-data:/data
+    ports:
+      - 6380:6379
+    networks:
+      - exchange-net
 
 
 volumes:
   exchange-postgres-data:
+  exchange-redis-data:
 
 networks:
   exchange-net:
