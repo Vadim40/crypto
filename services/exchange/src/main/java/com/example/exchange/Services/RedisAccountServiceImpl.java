@@ -3,7 +3,7 @@ package com.example.exchange.Services;
 
 import com.example.exchange.Models.DTOs.AccountResponse;
 import com.example.exchange.Services.Interfaces.RedisAccountService;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -11,9 +11,14 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Service
-@RequiredArgsConstructor
 public class RedisAccountServiceImpl implements RedisAccountService {
+
     private final RedisTemplate<String,Long> redisTemplate;
+
+    public RedisAccountServiceImpl(@Qualifier("redisTemplateLong") RedisTemplate<String, Long> redisTemplate) {
+        this.redisTemplate = redisTemplate;
+    }
+
     @Override
     public void saveAccount(AccountResponse accountResponse) {
         redisTemplate.opsForValue().set("account:" + accountResponse.email(), accountResponse.id(), 1, TimeUnit.DAYS);

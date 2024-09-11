@@ -30,20 +30,29 @@ public class RedisConfig {
         return new LettuceConnectionFactory(redisConf);
     }
 
-    @Bean
-    public RedisTemplate<String ,Long> redisTemplate() {
+
+    @Bean(name = "redisTemplateLong")
+    public RedisTemplate<String, Long> redisTemplateLong() {
         RedisTemplate<String, Long> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory());
-
-
         template.setKeySerializer(new StringRedisSerializer());
-
-
         template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
         template.setHashKeySerializer(new StringRedisSerializer());
         template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
-
         template.setEnableTransactionSupport(true);
         return template;
     }
+
+    @Bean(name = "redisTemplateString")
+    public RedisTemplate<String, String> redisTemplateString() {
+        RedisTemplate<String, String> template = new RedisTemplate<>();
+        template.setConnectionFactory(redisConnectionFactory());
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new StringRedisSerializer());
+        template.setHashKeySerializer(new StringRedisSerializer());
+        template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
+        template.setEnableTransactionSupport(true);
+        return template;
+    }
+
 }
