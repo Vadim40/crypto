@@ -9,6 +9,8 @@ public class KafkaWalletConfig {
     public NewTopic transactionConfirmationTopic(){
         return TopicBuilder
                 .name("transaction-confirmation")
+                .partitions(2)
+                .replicas(2)
                 .build();
 
     }
