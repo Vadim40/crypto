@@ -10,7 +10,10 @@ public class KafkaAuthenticationConfig {
 
     @Bean
     public NewTopic accountCreationTopic() {
-        return TopicBuilder.name("account-creation").build();
+        return TopicBuilder.name("account-creation")
+                .partitions(1)
+                .replicas(2)
+                .build();
     }
 
     @Bean
@@ -28,6 +31,8 @@ public class KafkaAuthenticationConfig {
 
         return TopicBuilder
                 .name("password-change-event")
+                .partitions(1)
+                .replicas(2)
                 .build();
     }
 

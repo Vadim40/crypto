@@ -17,10 +17,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class AuthenticationProducer {
 
-    private final KafkaTemplate<String, AccountCreationEvent> accountCreationEventKafkaTemplate;
-    private final KafkaTemplate<String, UserLoginEvent> userLoginEventKafkaTemplate;
-    private final KafkaTemplate<String, PasswordChangeEvent> passwordChangeEventKafkaTemplate;
-    private final KafkaTemplate<String, OtpVerification> otpVerificationKafkaTemplate;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     public void sendAccountCreationConfirmation(AccountCreationEvent accountCreationEvent) {
         log.info("Sending account creation event with ID: {} and email: {}",
@@ -29,7 +26,7 @@ public class AuthenticationProducer {
                 .withPayload(accountCreationEvent)
                 .setHeader(KafkaHeaders.TOPIC, "account-creation")
                 .build();
-        accountCreationEventKafkaTemplate.send(message);
+        kafkaTemplate.send(message);
     }
 
     public void sendUserLoginEvent(UserLoginEvent userLoginEvent) {
@@ -39,7 +36,7 @@ public class AuthenticationProducer {
                 .withPayload(userLoginEvent)
                 .setHeader(KafkaHeaders.TOPIC, "user-login-event")
                 .build();
-        userLoginEventKafkaTemplate.send(message);
+        kafkaTemplate.send(message);
     }
 
     public void sendPasswordChangeEvent(PasswordChangeEvent passwordChangeEvent) {
@@ -49,7 +46,7 @@ public class AuthenticationProducer {
                 .withPayload(passwordChangeEvent)
                 .setHeader(KafkaHeaders.TOPIC, "password-change-event")
                 .build();
-        passwordChangeEventKafkaTemplate.send(message);
+        kafkaTemplate.send(message);
     }
 
     public void sendOtpVerification(OtpVerification otpVerification) {
@@ -59,6 +56,6 @@ public class AuthenticationProducer {
                 .withPayload(otpVerification)
                 .setHeader(KafkaHeaders.TOPIC, "otp-verification")
                 .build();
-        otpVerificationKafkaTemplate.send(message);
+        kafkaTemplate.send(message);
     }
 }

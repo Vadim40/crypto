@@ -22,7 +22,6 @@ spring:
           otpVerification:com.example.authenticationservice.Kafka.DTOs.OtpVerification,
           passwordChangeEvent:com.example.authenticationservice.Kafka.DTOs.PasswordChangeEvent,
           userLoginEvent:com.example.authenticationservice.Kafka.DTOs.UserLoginEvent
-        spring.json.add-type-info: false
     properties:
       spring:
         jackson:
