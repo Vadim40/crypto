@@ -1,11 +1,12 @@
 package com.example.notification.Kafka.DTOs;
 
-import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
+import java.time.LocalDateTime;
 public record UserLoginEvent(
         Long accountId,
         String email,
-        LocalDateTime loginTimestamp,
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss") LocalDateTime loginTimestamp,
         String remoteIp
 ) {
 }
