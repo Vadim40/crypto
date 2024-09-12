@@ -1,63 +1,61 @@
 package com.example.exchange.Services;
 
-import com.example.exchange.Exceptions.CryptoRateNotFoundException;
 import com.example.exchange.Kafka.DTOs.ExchangeConfirmation;
 import com.example.exchange.Kafka.ExchangeProducer;
 import com.example.exchange.Models.CryptoRate;
-import com.example.exchange.Models.DTOs.AccountResponse;
-import com.example.exchange.Repositories.CryptoRateRepository;
 import com.example.exchange.Services.Interfaces.AccountService;
+import com.example.exchange.Services.Interfaces.CryptoRateDbService;
+import com.example.exchange.Services.Interfaces.CryptoRateRedisService;
 import com.example.exchange.Services.Interfaces.CryptoRateService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
-
+@Slf4j
 public class CryptoRateServiceImpl implements CryptoRateService {
-    private final CryptoRateRepository cryptoRateRepository;
-    private final ExchangeProducer exchangeProducer;
+
+    private final CryptoRateRedisService redisService;
+    private final CryptoRateDbService dbService;
     private final AccountService accountService;
+    private final ExchangeProducer exchangeProducer;
 
-    @Override
     public CryptoRate findCryptoRate(String baseCurrency, String targetCurrency) {
-        return cryptoRateRepository.findCryptoRateByBaseCurrencyAndTargetCurrency(baseCurrency, targetCurrency)
-                .orElseThrow(() -> new CryptoRateNotFoundException(
-                        "Crypto rate for: " + baseCurrency + "/" + targetCurrency + " not found"));
+        return findCryptoRateInRedisOrDb(baseCurrency, targetCurrency);
     }
 
-    @Override
-    public CryptoRate saveCryptoRate(CryptoRate rate) {
-        return cryptoRateRepository.save(rate);
+    private CryptoRate findCryptoRateInRedisOrDb(String baseCurrency, String targetCurrency) {
+        return redisService.findCryptoRate(baseCurrency, targetCurrency)
+                .map(rate -> new CryptoRate(null, baseCurrency, targetCurrency, rate))
+                .orElseGet(() -> dbService.findCryptoRate(baseCurrency, targetCurrency));
     }
+
 
     @Override
     public void executeCurrencyConversion(String baseCurrency, String targetCurrency, BigDecimal amount, String email) {
-        AccountResponse accountResponse = accountService.findAccountByEmail(email);
+        Long accountId = accountService.findAccountIdByEmail(email);
+        BigDecimal rate = findRateInRedisOrDb(baseCurrency, targetCurrency);
         ExchangeConfirmation exchangeConfirmation = createExchangeConfirmation(
-                baseCurrency, targetCurrency, amount, accountResponse);
+                baseCurrency, targetCurrency, rate, amount, accountId);
+
         exchangeProducer.sendExchangeConfirmation(exchangeConfirmation);
     }
 
-    @Override
-    public void updateCryptoRate(CryptoRate rate) {
-        CryptoRate savedRate= cryptoRateRepository.findCryptoRateByBaseCurrencyAndTargetCurrency(
-                rate.getBaseCurrency(), rate.getTargetCurrency()).orElse(rate);
-        savedRate.setRate(rate.getRate());
-        cryptoRateRepository.save(savedRate);
+    private BigDecimal findRateInRedisOrDb(String baseCurrency, String targetCurrency) {
+        return redisService.findCryptoRate(baseCurrency, targetCurrency)
+                .orElseGet(() -> dbService.findCryptoRate(baseCurrency, targetCurrency).getRate());
     }
 
-    private ExchangeConfirmation createExchangeConfirmation(String baseCurrency, String targetCurrency, BigDecimal amount, AccountResponse accountResponse) {
-        CryptoRate cryptoRate = findCryptoRate(baseCurrency, targetCurrency);
-        BigDecimal rate = cryptoRate.getRate();
+
+    private ExchangeConfirmation createExchangeConfirmation(String baseCurrency, String targetCurrency, BigDecimal rate, BigDecimal amount, Long accountId) {
         BigDecimal amountTo = amount.multiply(rate);
         LocalDateTime localDateTime = LocalDateTime.now();
         return new ExchangeConfirmation(
-                accountResponse.id(),
+                accountId,
                 baseCurrency,
                 targetCurrency,
                 amount,
@@ -65,4 +63,5 @@ public class CryptoRateServiceImpl implements CryptoRateService {
                 localDateTime
         );
     }
+
 }

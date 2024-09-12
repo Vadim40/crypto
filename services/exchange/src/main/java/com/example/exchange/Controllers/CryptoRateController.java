@@ -6,6 +6,7 @@ import com.example.exchange.Models.DTOs.ConvertRequest;
 import com.example.exchange.Models.DTOs.CryptoRateDTO;
 import com.example.exchange.Models.DTOs.ExchangeRequest;
 import com.example.exchange.Services.Interfaces.CryptoRateService;
+import com.example.exchange.Services.Interfaces.CryptoRateDbService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,9 +20,10 @@ import org.springframework.web.bind.annotation.*;
 public class CryptoRateController {
     private final CryptoRateService cryptoRateService;
     private final CryptoRateMapper cryptoRateMapper;
+
     @GetMapping("/exchange")
     ResponseEntity<CryptoRateDTO> findExchangeRate(@Valid @RequestBody ExchangeRequest request){
-        CryptoRate cryptoRate=cryptoRateService.findCryptoRate(request.baseCurrency(), request.targetCurrency());
+        CryptoRate cryptoRate= cryptoRateService.findCryptoRate(request.baseCurrency(), request.targetCurrency());
         CryptoRateDTO cryptoRateDTO=cryptoRateMapper.mapCryptoRateToCryptoRateDTO(cryptoRate);
         return new ResponseEntity<>(cryptoRateDTO, HttpStatus.OK);
     }

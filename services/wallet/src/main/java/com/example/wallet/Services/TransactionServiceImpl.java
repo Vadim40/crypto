@@ -39,14 +39,14 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public List<Transaction> findAccountTransactionsByTransactionType(TransactionType transactionType, String email) {
-        Long accountId = accountService.findAccountByEmail(email).id();
+        Long accountId = accountService.findAccountIdByEmail(email);
         return transactionRepository.findTransactionsByTransactionTypeAndAccountId(transactionType, accountId)
                 .orElseThrow(() -> new TransactionNotFoundException("Transactions not found for type: " + transactionType));
     }
 
     @Override
     public List<Transaction> findAccountTransactionsByTransactionTypeAfterDate(TransactionType transactionType, LocalDate date, String email) {
-        Long accountId = accountService.findAccountByEmail(email).id();
+        Long accountId = accountService.findAccountIdByEmail(email);
         return transactionRepository.findTransactionsByTransactionTypeAndTransactionDateAfterAndAccountId(transactionType, date, accountId)
                 .orElseThrow(() -> new TransactionNotFoundException("Transactions not found for type: " + transactionType + ", after date: " + date));
     }
@@ -54,29 +54,29 @@ public class TransactionServiceImpl implements TransactionService {
     @Transactional
     @Override
     public void transferTokens(TransferRequest request, String email) {
-        AccountResponse accountResponse = accountService.findAccountByEmail(email);
-        processTokenTransfer(accountResponse, request);
+        Long accountId = accountService.findAccountIdByEmail(email);
+        processTokenTransfer(accountId,email, request);
     }
 
     @Transactional
     @Override
     public void depositTokens(DepositRequest request, String email) {
-        AccountResponse accountResponse = accountService.findAccountByEmail(email);
-        processTokenDeposit(accountResponse, request);
+        Long accountId = accountService.findAccountIdByEmail(email);
+        processTokenDeposit(accountId, email, request);
     }
 
     @Transactional
     @Override
     public void withdrawTokens(WithdrawalRequest request, String email) {
-        AccountResponse accountResponse = accountService.findAccountByEmail(email);
-        processTokenWithdrawal(accountResponse, request);
+        Long accountId = accountService.findAccountIdByEmail(email);
+        processTokenWithdrawal(accountId, email, request);
     }
 
     @Transactional
     @Override
     public void receiveTokens(ReceiveRequest request, String email) {
-        AccountResponse accountResponse = accountService.findAccountByEmail(email);
-        processTokenReceive(accountResponse, request);
+        Long accountId = accountService.findAccountIdByEmail(email);
+        processTokenReceive(accountId, request);
     }
 
     @Transactional
@@ -89,27 +89,28 @@ public class TransactionServiceImpl implements TransactionService {
         Wallet wallet = walletService.findWalletByAccountId(confirmation.accountId());
         tokenService.subtractTokens(confirmation.symbolFrom(), confirmation.amountFrom(), wallet);
         tokenService.addTokens(confirmation.symbolTo(), confirmation.amountTo(), wallet);
-        
+
         createAndSaveExchangeTransaction(wallet, confirmation);
     }
 
 
-
-    private void processTokenTransfer(AccountResponse accountResponse, TransferRequest request) {
-        Wallet sourceWallet = walletService.findWalletByAccountId(accountResponse.id());
+    private void processTokenTransfer(Long accountId, String email, TransferRequest request) {
+        Wallet sourceWallet = walletService.findWalletByAccountId(accountId);
         Wallet destinationWallet = walletService.findWalletByAddress(request.destinationAddress());
 
         tokenService.transferTokens(request.tokenSymbol(), request.amount(), sourceWallet, destinationWallet);
-        createAndSaveTransferTransaction(accountResponse.id(), sourceWallet, destinationWallet, request);
+        createAndSaveTransferTransaction(accountId, sourceWallet, destinationWallet, request);
 
-       sendTransactionConfirmation(sourceWallet.getAddress(),accountResponse.email()
-               ,request.tokenSymbol(),
-               request.amount(),
-               destinationWallet.getAddress());
+        sendTransactionConfirmation(
+                sourceWallet.getAddress(),
+                email,
+                request.tokenSymbol(),
+                request.amount(),
+                destinationWallet.getAddress());
     }
 
     private void sendTransactionConfirmation(String sourceAddress, String email, String tokenSymbol, BigDecimal amount, String destinationAddress) {
-        TransactionConfirmation transactionConfirmation=new TransactionConfirmation(
+        TransactionConfirmation transactionConfirmation = new TransactionConfirmation(
                 email,
                 LocalDateTime.now(),
                 tokenSymbol,
@@ -120,35 +121,38 @@ public class TransactionServiceImpl implements TransactionService {
         walletProducer.sendTransactionConfirmation(transactionConfirmation);
     }
 
-    private void processTokenDeposit(AccountResponse accountResponse, DepositRequest request) {
-        Wallet wallet = walletService.findWalletByAccountId(accountResponse.id());
+    private void processTokenDeposit(Long accountId, String email, DepositRequest request) {
+        Wallet wallet = walletService.findWalletByAccountId(accountId);
 
         tokenService.addTokens(request.tokenSymbol(), request.amount(), wallet);
 
-        createAndSaveDepositTransaction(accountResponse.id(), wallet, request);
+        createAndSaveDepositTransaction(accountId, wallet, request);
     }
 
-    private void processTokenWithdrawal(AccountResponse accountResponse, WithdrawalRequest request) {
-        Wallet wallet = walletService.findWalletByAccountId(accountResponse.id());
+    private void processTokenWithdrawal(Long accountId, String email, WithdrawalRequest request) {
+        Wallet wallet = walletService.findWalletByAccountId(accountId);
 
         tokenService.subtractTokens(request.tokenSymbol(), request.amount(), wallet);
 
-        createAndSaveWithdrawalTransaction(accountResponse.id(), wallet, request);
+        createAndSaveWithdrawalTransaction(accountId, wallet, request);
 
-        sendTransactionConfirmation(wallet.getAddress(),accountResponse.email()
-                ,request.tokenSymbol(),
+        sendTransactionConfirmation(
+                wallet.getAddress(),
+                email,
+                request.tokenSymbol(),
                 request.amount(),
                 request.destinationAddress());
     }
 
-    private void processTokenReceive(AccountResponse accountResponse, ReceiveRequest request) {
+    private void processTokenReceive(Long accountId, ReceiveRequest request) {
         Wallet sourceWallet = walletService.findWalletByAddress(request.sourceAddress());
-        Wallet destinationWallet = walletService.findWalletByAccountId(accountResponse.id());
+        Wallet destinationWallet = walletService.findWalletByAccountId(accountId);
 
         tokenService.transferTokens(request.tokenSymbol(), request.amount(), sourceWallet, destinationWallet);
 
-        createAndSaveReceiveTransaction(accountResponse.id(), sourceWallet, destinationWallet, request);
+        createAndSaveReceiveTransaction(accountId, sourceWallet, destinationWallet, request);
     }
+
     private void createAndSaveExchangeTransaction(Wallet wallet, ExchangeConfirmation confirmation) {
         ExchangeTransaction transaction = new ExchangeTransaction();
         transaction.setAccountId(confirmation.accountId());

@@ -1,4 +1,7 @@
 spring:
+  redis:
+    host: localhost
+    port: 6380
   datasource:
     url: jdbc:postgresql://localhost:5435/exchange_service
     username: user
