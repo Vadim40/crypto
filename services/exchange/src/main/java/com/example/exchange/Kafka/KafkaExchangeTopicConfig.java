@@ -9,6 +9,8 @@ public class KafkaExchangeTopicConfig {
     public NewTopic exchangeTopic(){
         return TopicBuilder
                 .name("exchange-topic")
+                .replicas(2)
+                .partitions(2)
                 .build();
 
     }
