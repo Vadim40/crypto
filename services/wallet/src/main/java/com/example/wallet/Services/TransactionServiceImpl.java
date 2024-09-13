@@ -161,7 +161,7 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setAmountFrom(confirmation.amountFrom());
         transaction.setAmountTo(confirmation.amountTo());
         transaction.setTransactionType(TransactionType.EXCHANGE);
-        transaction.setTransactionDate(confirmation.timestamp());
+        transaction.setTransactionDate(confirmation.timestamp().toLocalDate());
         transaction.setWallet(wallet);
 
         transactionRepository.save(transaction);
