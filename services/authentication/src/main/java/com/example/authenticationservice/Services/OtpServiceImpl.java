@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -34,20 +35,26 @@ public class OtpServiceImpl implements OtpService {
     @Value("${otp.lifetime}")
     private Duration otpLifetime;
 
-
+    @Transactional
     @Override
     public String generateOtp(String email) {
         int otpCode = generateOtpCode();
         Account account = accountService.findAccountByEmail(email);
         Otp otp = createOtp(otpCode, account);
-        otpRepository.save(otp);
+        saveOtp(otp, account);
         log.info("Otp code: " + otpCode);
         sendOtpVerification(account, otpCode);
         return String.valueOf(otpCode);
     }
 
+    private void saveOtp(Otp otp, Account account) {
+        otpRepository.save(otp);
+        account.setOtp(otp);
+        accountService.saveAccount(account);
+    }
+
     private void sendOtpVerification(Account account, int otpCode) {
-        OtpVerification otpVerification=new OtpVerification(account.getId(),account.getEmail(), otpCode);
+        OtpVerification otpVerification = new OtpVerification(account.getId(), account.getEmail(), otpCode);
         authenticationProducer.sendOtpVerification(otpVerification);
     }
 
@@ -57,7 +64,7 @@ public class OtpServiceImpl implements OtpService {
     }
 
     private Otp createOtp(int otpCode, Account account) {
-        Otp otp =otpRepository.findOtpByAccount(account).orElse(new Otp());
+        Otp otp = otpRepository.findOtpByAccount(account).orElse(new Otp());
         otp.setOtp(passwordEncoder.encode(String.valueOf(otpCode)));
         otp.setAccount(account);
         otp.setExpiryTime(LocalDateTime.now().plus(otpLifetime));
@@ -101,7 +108,6 @@ public class OtpServiceImpl implements OtpService {
     public Otp saveOtp(Otp otp) {
         return otpRepository.save(otp);
     }
-
 
 
     @Override

@@ -26,7 +26,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     private final AccountService accountService;
     @Value("${jwt.lifetime.refresh}")
     private Duration refreshLifeTime;
-
+    @Transactional
     @Override
     public String createRefreshToken(String email) {
         Account account = accountService.findAccountByEmail(email);
@@ -39,6 +39,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         return UUID.randomUUID().toString();
     }
 
+
     private void saveRefreshToken(Account account, String token) {
         String tokenHash = hashToken(token);
         RefreshToken refreshToken = refreshTokenRepository.findRefreshTokenByAccount(account)
@@ -47,6 +48,8 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         refreshToken.setAccount(account);
         refreshToken.setExpiryTime(LocalDateTime.now().plus(refreshLifeTime));
         refreshTokenRepository.save(refreshToken);
+        account.setRefreshToken(refreshToken);
+        accountService.saveAccount(account);
     }
 
 
@@ -86,12 +89,16 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Transactional
     public void deleteTokenByAccountEmail(String email) {
         refreshTokenRepository.deleteRefreshTokenByAccountEmail(email);
+        Account account = accountService.findAccountByEmail(email);
+        account.setRefreshToken(null);
+        accountService.saveAccount(account);
     }
 
     @Override
     @Transactional
     @Scheduled(fixedRate = 36000000)
     public void deleteExpiredTokens() {
-
+        LocalDateTime now=LocalDateTime.now();
+        refreshTokenRepository.deleteByExpiryTimeBefore(now);
     }
 }

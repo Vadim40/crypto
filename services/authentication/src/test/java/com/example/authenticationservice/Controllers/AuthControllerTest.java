@@ -1,28 +1,38 @@
 package com.example.authenticationservice.Controllers;
 
+import com.example.authenticationservice.Kafka.DTOs.OtpVerification;
+import com.example.authenticationservice.Kafka.DTOs.UserLoginEvent;
 import com.example.authenticationservice.Models.Account;
-import com.example.authenticationservice.Models.CustomUserDetails;
 import com.example.authenticationservice.Models.DTOs.JwtRequest;
 import com.example.authenticationservice.Models.DTOs.JwtResponse;
-import com.example.authenticationservice.Services.CustomUserDetailsService;
+import com.example.authenticationservice.Models.DTOs.RefreshRequest;
 import com.example.authenticationservice.Services.Interfaces.AccountService;
-import com.example.authenticationservice.Services.Interfaces.AuthenticationService;
 import com.example.authenticationservice.Services.Interfaces.OtpService;
+import com.example.authenticationservice.Services.RefreshTokenServiceImpl;
 import com.example.authenticationservice.Utils.JwtTokenUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.messaging.Message;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
+import org.testcontainers.containers.KafkaContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -30,30 +40,53 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
+@TestPropertySource(properties = {
+        "spring.datasource.url=jdbc:h2:mem:testdb",
+        "spring.datasource.driverClassName=org.h2.Driver",
+        "spring.datasource.username=sa",
+        "spring.datasource.password=password",
+        "spring.datasource.platform=h2",
+        "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
+        "spring.kafka.bootstrap-servers=${kafka.bootstrap-servers}"
+})
 class AuthControllerTest {
-    @Autowired
-    private AuthenticationService authenticationService;
+    private static KafkaContainer kafkaContainer;
+
+    @MockBean
+    private KafkaTemplate<String, Object> kafkaTemplate;
+
     @Autowired
     private MockMvc mockMvc;
+
     @Autowired
     private ObjectMapper objectMapper;
 
     @Autowired
     private AccountService accountService;
     @Autowired
+    private RefreshTokenServiceImpl refreshTokenService;
+
+    @Autowired
     private OtpService otpService;
-
     @Autowired
-   private  JwtTokenUtils jwtTokenUtils;
+    private JwtTokenUtils jwtTokenUtils;
 
-    @Autowired
-    private CustomUserDetailsService userDetailsService;
 
-    @BeforeEach
-    void setUp() {
-        accountService.deleteAllAccounts();
+    private final String url = "/api/v1/auth";
+
+    @BeforeAll
+    static void setUp() {
+        kafkaContainer = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:latest"));
+        kafkaContainer.start();
+        System.setProperty("kafka.bootstrap-servers", kafkaContainer.getBootstrapServers());
     }
 
+    @AfterAll
+    static void tearDown() {
+        if (kafkaContainer != null) {
+            kafkaContainer.stop();
+        }
+    }
 
     @Test
     void returnTokenTest_OK() throws Exception {
@@ -68,10 +101,15 @@ class AuthControllerTest {
         String jsonRequest = objectMapper.writeValueAsString(jwtRequest);
 
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/auth")
+        mockMvc.perform(MockMvcRequestBuilders.post(url + "/login")
                         .content(jsonRequest)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
+        Mockito.verify(kafkaTemplate).send(Mockito.argThat((Message<?> message) ->
+                message.getHeaders().get(KafkaHeaders.TOPIC).equals("user-login-event") &&
+                        message.getPayload() instanceof UserLoginEvent
+        ));
+
 
     }
 
@@ -88,7 +126,8 @@ class AuthControllerTest {
 
         String jsonRequest = objectMapper.writeValueAsString(jwtRequest);
 
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post("/api/auth")
+
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post(url + "/login")
                         .content(jsonRequest)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -96,10 +135,15 @@ class AuthControllerTest {
 
         String jsonResponse = result.getResponse().getContentAsString();
         JwtResponse jwtResponse = objectMapper.readValue(jsonResponse, JwtResponse.class);
-        String jwtToken = jwtResponse.tokens().get("access");
+        String jwtToken = jwtResponse.tokens().get("accessTokenOtp");
 
         boolean isOtpToken = jwtTokenUtils.isOtpToken(jwtToken);
         Assertions.assertThat(isOtpToken).isTrue();
+
+        Mockito.verify(kafkaTemplate).send(Mockito.argThat((Message<?> message) ->
+                message.getHeaders().get(KafkaHeaders.TOPIC).equals("otp-verification") &&
+                        message.getPayload() instanceof OtpVerification
+        ));
 
     }
 
@@ -112,7 +156,7 @@ class AuthControllerTest {
         String jsonRequest = objectMapper.writeValueAsString(jwtRequest);
 
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/auth")
+        mockMvc.perform(MockMvcRequestBuilders.post(url + "/login")
                         .content(jsonRequest)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized());
@@ -131,19 +175,23 @@ class AuthControllerTest {
 
         String otp = otpService.generateOtp(email);
 
-        CustomUserDetails customUserDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(email);
-        String jwtOtp = jwtTokenUtils.generateTokenOtp(customUserDetails);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/verify-otp")
+        mockMvc.perform(MockMvcRequestBuilders.post(url + "/verify-otp")
                         .param("otp", otp)
-                        .header("Authorization", "Bearer " + jwtOtp))
+                        .header("X-User-Name", email)
+                        .header("X-User-Roles", "ROLE_USER"))
                 .andExpect(status().isOk());
+
+        Mockito.verify(kafkaTemplate).send(Mockito.argThat((Message<?> message) ->
+                message.getHeaders().get(KafkaHeaders.TOPIC).equals("user-login-event") &&
+                        message.getPayload() instanceof UserLoginEvent
+        ));
 
 
     }
 
     @Test
-    void verifyOtp__OtpIsNotEnabled() throws Exception {
+    void verifyOtp_OtpIsNotEnabled() throws Exception {
         Account account = new Account();
         String email = "some";
         String password = "1234";
@@ -152,38 +200,63 @@ class AuthControllerTest {
         accountService.saveAccount(account);
 
         String otp = "1222";
-
-        CustomUserDetails customUserDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(email);
-        String jwtOtp = jwtTokenUtils.generateTokenOtp(customUserDetails);
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/verify-otp")
+        mockMvc.perform(MockMvcRequestBuilders.post(url + "/verify-otp")
                         .param("otp", otp)
-                        .header("Authorization", "Bearer " + jwtOtp))
+                        .header("X-User-Name", email)
+                        .header("X-User-Roles", "ROLE_USER"))
                 .andExpect(status().isBadRequest());
 
 
     }
 
     @Test
-    void verifyOtp_Forbidden_NotTokenOtp() throws Exception {
+    void logout_OK() throws Exception {
         Account account = new Account();
         String email = "some";
         String password = "1234";
         account.setEmail(email);
         account.setPassword(password);
-        account.setOtpEnabled(true);
         accountService.saveAccount(account);
+        JwtRequest jwtRequest = new JwtRequest(email, password);
 
-        String otp = otpService.generateOtp(email);
+        String jsonRequest = objectMapper.writeValueAsString(jwtRequest);
 
-        CustomUserDetails customUserDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(email);
-        String jwt = jwtTokenUtils.generateToken(customUserDetails);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/verify-otp")
-                        .param("otp", otp)
-                        .header("Authorization", "Bearer " + jwt))
-                .andExpect(status().isForbidden());
+        mockMvc.perform(MockMvcRequestBuilders.post(url + "/login")
+                        .content(jsonRequest)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
 
+        Account foundAccount1 = accountService.findAccountByEmail(email);
+        System.out.println(foundAccount1.getRefreshToken().getTokenHash());
+        String refreshToken1=foundAccount1.getRefreshToken().getTokenHash();
+        Assertions.assertThat(refreshToken1).isNotNull();
+
+        mockMvc.perform(MockMvcRequestBuilders.post(url + "/logout")
+                        .header("X-User-Name", email)
+                        .header("X-User-Roles", "ROLE_USER"))
+                .andExpect(status().isOk());
+        Account foundAccount2 = accountService.findAccountByEmail(email);
+
+        Assertions.assertThat(foundAccount2.getRefreshToken()).isNull();
+    }
+    @Test
+    void refreshToken_Ok() throws Exception {
+        Account account = new Account();
+        String email = "some";
+        String password = "1234";
+        account.setEmail(email);
+        account.setPassword(password);
+        accountService.saveAccount(account);
+        String refreshToken=refreshTokenService.createRefreshToken(email);
+        RefreshRequest request=new RefreshRequest(refreshToken);
+        String jsonRequest=objectMapper.writeValueAsString(request);
+        mockMvc.perform(MockMvcRequestBuilders.post(url + "/refresh-token")
+                .content(jsonRequest)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
 
     }
+
+
 }
